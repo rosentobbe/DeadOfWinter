@@ -22,7 +22,7 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
-public class GameFrame extends JFrame implements ActionListener {
+public class GameFrameOLD extends JFrame implements ActionListener {
 /************************************************************
 *			           Declares/initialization              *
 *************************************************************/	
@@ -114,7 +114,7 @@ public class GameFrame extends JFrame implements ActionListener {
 /***********************************************************
 *			          Start of Class                       *
 ************************************************************/
-	public GameFrame(Player[] _playerArrayay, int numPlayers, JCheckBox[] _listChars, String[] labels, String[] deck) {
+	public GameFrameOLD(Player[] _playerArrayay, int numPlayers, JCheckBox[] _listChars, String[] labels, String[] deck) {
 		this.setSize(700, 700);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
@@ -498,7 +498,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		/****************************/
 		if(!_crossroadDeck.isTriggered(_cardNumber)) {
 			
-			switch(_cardNumber) {
+//			switch(_cardNumber) {
 //			case 1: 
 //				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 //					_crossroadDeck.card1(_loc, _char);
@@ -513,10 +513,6 @@ public class GameFrame extends JFrame implements ActionListener {
 //				if(isCharAtLocation("Colony")) {
 //					_crossroadDeck.card72();
 //				} break;
-//			/*case 73:
-//				if() {
-//					_crossroadDeck.card73();
-//				} break;*/ //Fix a player count on a location
 //			case 74:
 //				if(_actionsSel.equals("Search") && _loc.equals("Gas Station")) {
 //					_crossroadDeck.card74();
@@ -546,11 +542,12 @@ public class GameFrame extends JFrame implements ActionListener {
 //				if(!_charDeck.contains("Harman Brooks") && (isCharExiled("Harman Brooks")==0)) {
 //					_crossroadDeck.card80();
 //				} break;
-			}
-		}
+//			}
+//		}
 		/*else { // Uncomment this as all crossroadcards are finished!
 			_cardNumber = rand.nextInt(82) + 1;
 			checkCard();
-		}*/
+			}*/
+		}
 	}
 }
