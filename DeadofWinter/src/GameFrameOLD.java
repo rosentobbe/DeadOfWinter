@@ -240,7 +240,7 @@ public class GameFrameOLD extends JFrame implements ActionListener {
 		_addremPanel.add(_add_rem, BorderLayout.PAGE_END);
 		
 		//Crossroaddeck and random draw.
-		_crossroadDeck = new Crossroads(_playerArray, _ListLoc, _whosTurn);
+		_crossroadDeck = new Crossroads(_playerArray, _ListLoc);
 		_crossroadDeck.setAlwaysOnTop(true);
 		rand = new Random();
 		_cardNumber = rand.nextInt(82) + 1;

@@ -240,7 +240,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		_addremPanel.add(_add_rem, BorderLayout.PAGE_END);
 		
 		//Crossroaddeck and random draw.
-		_crossroadDeck = new Crossroads(_playerArray, _ListLoc, _whosTurn);
+		_crossroadDeck = new Crossroads(_playerArray, _ListLoc);
 		_crossroadDeck.setAlwaysOnTop(true);
 		rand = new Random();
 		_cardNumber = rand.nextInt(82) + 1;
@@ -380,32 +380,10 @@ public class GameFrame extends JFrame implements ActionListener {
 				}
 			}
 			else if(_actionsSel.equals("Use Weapon")) {
-				if(!_loc.equals(_currcharpos)) {
-					error_cancel = 1;
-					_Errorlable.setText(_actionsSel + _Errortext);
-					_dropPanel.add(_Errorlable);
-				}
-				else {
-					if(error_cancel == 1 && _Errorlable.getParent().equals(_dropPanel)) 
-						_dropPanel.remove(_Errorlable);
-					for(int i=0; i < _ListLoc.size(); i++) {
-						if(_ListLoc.get(i).getName().equals(_loc)){
-							_ListLoc.get(i).remZombies(1);
-							}
-						// Lägga till så att man kan ändra antalet Zombies man dödar?! 
-					}
-				}
+				useWeaponIfPossible();
 			}
 			else if(_actionsSel.equals("Move")) {
-				if(_loc.equals(_currcharpos)) {
-					error_cancel = 1;
-					_Errorlable.setText(_actionsSel + _ErrorText_moveSameLoc);
-					_dropPanel.add(_Errorlable);
-				}
-				else if(error_cancel == 1 && _Errorlable.getParent().equals(_dropPanel)) 
-					_dropPanel.remove(_Errorlable);
-				else
-					moveTo(_loc, _char);
+				moveIfPossible();
 			}
 			else if(_actionsSel.equals("Use Food")) {
 				//Ska man ens göra något här? 
@@ -486,18 +464,57 @@ public class GameFrame extends JFrame implements ActionListener {
 			checkCard();
 		}
 		else if(source.equals(_crossroadDeck._Con)) {
+			resolveCardOption(_cardNumber);
 			getInfo();
 		}
 		
 		getInfo();
 		checkCard();
 	}
+
+	private void useWeaponIfPossible() {
+		if(!_loc.equals(_currcharpos)) {
+			error_cancel = 1;
+			_Errorlable.setText(_actionsSel + _Errortext);
+			_dropPanel.add(_Errorlable);
+		}
+		else {
+			if(error_cancel == 1 && _Errorlable.getParent().equals(_dropPanel)) 
+				_dropPanel.remove(_Errorlable);
+			for(int i=0; i < _ListLoc.size(); i++) {
+				if(_ListLoc.get(i).getName().equals(_loc)){
+					_ListLoc.get(i).remZombies(1);
+					}
+				// Lägga till så att man kan ändra antalet Zombies man dödar?! 
+			}
+		}
+	}
+
+	private void moveIfPossible() {
+		if(_loc.equals(_currcharpos)) {
+			error_cancel = 1;
+			_Errorlable.setText(_actionsSel + _ErrorText_moveSameLoc);
+			_dropPanel.add(_Errorlable);
+		}
+		else if(error_cancel == 1 && _Errorlable.getParent().equals(_dropPanel)) 
+			_dropPanel.remove(_Errorlable);
+		else
+			moveTo(_loc, _char);
+	}
+	
+	private void resolveCardOption(int cardNumber) {
+		int selectedOption = _crossroadDeck.getSelected();
+		
+	}
+	
 	public void checkCard() {
 		/**************************/
 		_cardNumber = 1; // KOM IHÅG ATT TA BORT DENNA!
+		_cardNumber = rand.nextInt(82) + 1;
 		/****************************/
+
 		if(!_crossroadDeck.isTriggered(_cardNumber)) {
-			
+			_crossroadDeck.loadCardtoPanel(_cardNumber);
 			switch(_cardNumber) {
 //			case 1: 
 //				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
