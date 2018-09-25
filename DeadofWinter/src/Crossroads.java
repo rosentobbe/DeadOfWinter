@@ -18,7 +18,7 @@ import javax.swing.JTextPane;
 import bsh.Interpreter;
 
 public class Crossroads extends JFrame implements ActionListener{
-	int[] _triggerStatus; // 1: Already triggered, 0: Not triggered.
+	private int[] _triggerStatus; // 1: Already triggered, 0: Not triggered.
 	private CSVParser collectCardsFromFile;
 	//private ArrayList<String[]> DrawDeckofCrossroadCards;
 	private JPanel window;
@@ -50,7 +50,6 @@ public class Crossroads extends JFrame implements ActionListener{
 	protected JButton _Con;
 	private int _whosTurn;
 	private int _selectedOption;
-	private  boolean _waitToBePressed; 
 
 	private JButton _optB_1;
 	private JButton _optB_2;
@@ -124,7 +123,7 @@ public class Crossroads extends JFrame implements ActionListener{
 		_playerArray[_whosTurn].setCharPos(_chartoMove, _newLoc);
 	}
 	
-	public void repaintBPanel() {
+	private void repaintBPanel() {
 		buttonPanel.removeAll();
 		buttonPanel.add(_Con);
 		buttonPanel.repaint();
@@ -135,21 +134,18 @@ public class Crossroads extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		if(source.equals(_optB_1)) {
-			_infoField.setText("Option 1: "+ _Opt1F);
+			_infoField.setText("Option 1: \n"+ _Opt1F);
 			_selectedOption = 1;
-			_waitToBePressed = true;
 			repaintBPanel();
 		}
 		else if(source.equals(_optB_2)) {
-			_infoField.setText("Option 2: "+ _Opt2F);
+			_infoField.setText("Option 2: \n"+ _Opt2F);
 			_selectedOption = 2;
-			_waitToBePressed = true;
 			repaintBPanel();
 		}
 		else if(source.equals(_optB_3)) {
-			_infoField.setText("Option 3: "+ _Opt3F);
+			_infoField.setText("Option 3: \n"+ _Opt3F);
 			_selectedOption = 3;
-			_waitToBePressed = true;
 			repaintBPanel();
 		}
 		else if(source.equals(_Con)) {
@@ -173,8 +169,8 @@ public class Crossroads extends JFrame implements ActionListener{
 	}
 
 	public void loadCardtoPanel(int whichCard) {
+		String completeCardText;
 		_selectedOption = 0;
-		_waitToBePressed = false;
 		_triggerStatus[whichCard] = 1;
 		_currTitle = collectCardsFromFile.getTitle(whichCard); //Title of the cards
 		_currCond = collectCardsFromFile.getCondition(whichCard) + "\n"; //Trigger Condition for the card
@@ -186,6 +182,13 @@ public class Crossroads extends JFrame implements ActionListener{
 		_Opt2F = collectCardsFromFile.getOptionTwo(whichCard); //Option 2 FUll
 		_Opt3F = collectCardsFromFile.getOptionThree(whichCard); //Option 3 FUll
 		_cardTitle.setText(_currTitle);
+		completeCardText = _currCond + _currSetup;
+		if(!_Opt1F.isEmpty())
+			completeCardText = completeCardText + "\nOption 1:\n";
+		if(!_Opt2F.isEmpty())
+			completeCardText = completeCardText + "\n\nOption 2:\n";
+		if(!_Opt3F.isEmpty())
+			completeCardText = completeCardText + "\n\nOption 3:\n";
 		_infoField.setText(_currCond + _currSetup + "\nOption 1: " + _Opt1S + 
 		"\n\nOption 2:" + _Opt2S);
 		buttonPanel.add(_optB_1);

@@ -504,70 +504,73 @@ public class GameFrame extends JFrame implements ActionListener {
 	
 	private void resolveCardOption(int cardNumber) {
 		int selectedOption = _crossroadDeck.getSelected();
+		solveCardEffect(selectedOption, cardNumber);
+	}
+	
+	private void solveCardEffect(int selectedOption, int onCard) {
 		
 	}
 	
 	public void checkCard() {
 		/**************************/
-		_cardNumber = 1; // KOM IHÅG ATT TA BORT DENNA!
 		_cardNumber = rand.nextInt(82) + 1;
 		/****************************/
 
 		if(!_crossroadDeck.isTriggered(_cardNumber)) {
 			_crossroadDeck.loadCardtoPanel(_cardNumber);
 			switch(_cardNumber) {
-//			case 1: 
-//				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
-//					_crossroadDeck.card1(_loc, _char);
-//				} break;
-//				
-//			case 71:
-//				if(_playerArray[_whosTurn].controlsChar("Janet Taylor") && (isCharExiled("Janet Taylor")==0)) {
-//					System.out.println("Triggered!");
-//					//_crossroadDeck.card71();
-//				} break;				
-//			case 72:
-//				if(isCharAtLocation("Colony")) {
-//					_crossroadDeck.card72();
-//				} break;
-//			/*case 73:
-//				if() {
-//					_crossroadDeck.card73();
-//				} break;*/ //Fix a player count on a location
-//			case 74:
-//				if(_actionsSel.equals("Search") && _loc.equals("Gas Station")) {
-//					_crossroadDeck.card74();
-//				} break;
-//			case 75:
-//				if(_playerArray[_whosTurn].controlsChar("Carla Thompson") && (isCharExiled("Carla Thompson")==0)) {
-//					moveTo("Police Station", "Carla Thompson");
-//					_crossroadDeck.card75();
-//				} break;
-//			case 76:
-//				if(_actionsSel.equals("Search") && _char.equals("Jenny Clark")) {
-//					_crossroadDeck.card76();
-//				} break;
-//			case 77:
-//				if(_actionsSel.equals("Move") && !_consi.equals("Wound") && !_consi.equals("Zombiebite")) {
-//					_crossroadDeck.card77();
-//				} break;
-//			case 78:
-//				if(_playerArray[_whosTurn].controlsChar("Loretta Clay") && (isCharExiled("Loretta Clay")==0)) {
-//					_crossroadDeck.card78();
-//				} break;
-//			case 79:
-//				if(_actionsSel.equals("Move") && isCharExiled(_char)==0) {
-//					_crossroadDeck.card79();
-//				} break;
-//			case 80:
-//				if(!_charDeck.contains("Harman Brooks") && (isCharExiled("Harman Brooks")==0)) {
-//					_crossroadDeck.card80();
-//				} break;
+			case 1: 
+				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+				
+			case 71:
+				if(_playerArray[_whosTurn].controlsChar("Janet Taylor") && (isCharExiled("Janet Taylor")==0)) {
+					System.out.println("Triggered!");
+					//_crossroadDeck.card71();
+				} break;				
+			case 72:
+				if(isCharAtLocation("Colony")) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+			/*case 73:
+				if() {
+					_crossroadDeck.card73();
+				} break;*/ //Fix a player count on a location
+			case 74:
+				if(_actionsSel.equals("Search") && _loc.equals("Gas Station")) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+			case 75:
+				if(_playerArray[_whosTurn].controlsChar("Carla Thompson") && (isCharExiled("Carla Thompson")==0)) {
+					moveTo("Police Station", "Carla Thompson");
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+			case 76:
+				if(_actionsSel.equals("Search") && _char.equals("Jenny Clark")) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+			case 77:
+				if(_actionsSel.equals("Move") && !_consi.equals("Wound") && !_consi.equals("Zombiebite")) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+			case 78:
+				if(_playerArray[_whosTurn].controlsChar("Loretta Clay") && (isCharExiled("Loretta Clay")==0)) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+			case 79:
+				if(_actionsSel.equals("Move") && isCharExiled(_char)==0) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
+			case 80:
+				if(!_charDeck.contains("Harman Brooks") && (isCharExiled("Harman Brooks")==0)) {
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				} break;
 			}
 		}
-		/*else { // Uncomment this as all crossroadcards are finished!
+		else { // Uncomment this as all crossroadcards are finished!
 			_cardNumber = rand.nextInt(82) + 1;
 			checkCard();
-		}*/
+		}
 	}
 }
