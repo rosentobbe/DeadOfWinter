@@ -26,6 +26,10 @@ public class Location {
 		return baracades;
 	}
 	
+	public int getNumSurvivors() {
+		return survivors.size();
+	}
+	
 	public ArrayList<String> getSurvivors() {
 		return survivors;
 	}

@@ -172,7 +172,7 @@ public class Crossroads extends JFrame implements ActionListener{
 		String completeCardText;
 		_selectedOption = 0;
 		_triggerStatus[whichCard] = 1;
-		_currTitle = collectCardsFromFile.getTitle(whichCard); //Title of the cards
+		_cardTitle.setText(collectCardsFromFile.getTitle(whichCard)); //Title of the cards
 		_currCond = collectCardsFromFile.getCondition(whichCard) + "\n"; //Trigger Condition for the card
 		_currSetup = collectCardsFromFile.getSetup(whichCard) + "\n"; //Setup/intro text for the card
 		_Opt1S = collectCardsFromFile.getOptionOneShort(whichCard); //Option 1 Short
@@ -181,18 +181,20 @@ public class Crossroads extends JFrame implements ActionListener{
 		_Opt1F = collectCardsFromFile.getOptionOne(whichCard); //Option 1 Full
 		_Opt2F = collectCardsFromFile.getOptionTwo(whichCard); //Option 2 FUll
 		_Opt3F = collectCardsFromFile.getOptionThree(whichCard); //Option 3 FUll
-		_cardTitle.setText(_currTitle);
 		completeCardText = _currCond + _currSetup;
-		if(!_Opt1F.isEmpty())
-			completeCardText = completeCardText + "\nOption 1:\n";
-		if(!_Opt2F.isEmpty())
-			completeCardText = completeCardText + "\n\nOption 2:\n";
-		if(!_Opt3F.isEmpty())
-			completeCardText = completeCardText + "\n\nOption 3:\n";
-		_infoField.setText(_currCond + _currSetup + "\nOption 1: " + _Opt1S + 
-		"\n\nOption 2:" + _Opt2S);
-		buttonPanel.add(_optB_1);
-		buttonPanel.add(_optB_2);
+		if(!_Opt1F.isEmpty()) {
+			completeCardText = completeCardText + "\nOption 1:\n" + _Opt1S;
+			buttonPanel.add(_optB_1);
+		}
+		if(!_Opt2F.isEmpty()) {
+			completeCardText = completeCardText + "\n\nOption 2:\n" + _Opt2S;
+			buttonPanel.add(_optB_2);
+		}
+		if(!_Opt3F.isEmpty()) {
+			completeCardText = completeCardText + "\n\nOption 3:\n" + _Opt3S;
+			buttonPanel.add(_optB_3);
+		}
+		_infoField.setText(completeCardText);
 		this.setVisible(true);
 	}																									// |
 }

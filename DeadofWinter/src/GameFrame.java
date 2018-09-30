@@ -289,6 +289,22 @@ public class GameFrame extends JFrame implements ActionListener {
 				return true;
 		return false;
 	}
+	public int whoControllsSurvivor(String survivorName) {
+		int playerControllingSurvivor = -1;
+		for(int i=0; i < numbPlayers; i++) {
+			if(_playerArray[i].controlsChar(survivorName)) {
+				playerControllingSurvivor = i;
+				break;
+			}
+		}
+		return playerControllingSurvivor;
+	}
+	public void samePlayerControllingSurvivor(ArrayList<String> survivors){
+		int[] whoControllsSearch = new int[survivors.size()];
+		for(int i = 0; i < survivors.size(); i++) {
+			whoControllsSearch[i] = whoControllsSurvivor(survivors.get(i));
+		}
+	}
 	public void checkboxes() {
 		boxGroup = new CheckboxGroup();
 		for(int i=0; i<_charString.length; i++) {
@@ -471,7 +487,6 @@ public class GameFrame extends JFrame implements ActionListener {
 		getInfo();
 		checkCard();
 	}
-
 	private void useWeaponIfPossible() {
 		if(!_loc.equals(_currcharpos)) {
 			error_cancel = 1;
@@ -508,16 +523,19 @@ public class GameFrame extends JFrame implements ActionListener {
 	}
 	
 	private void solveCardEffect(int selectedOption, int onCard) {
-		
+		if(onCard == 1 ) {
+			if(selectedOption == 1)
+				moveTo("Colony", _char);
+		}
 	}
 	
 	public void checkCard() {
 		/**************************/
 		_cardNumber = rand.nextInt(82) + 1;
+		_cardNumber = 1;
 		/****************************/
 
 		if(!_crossroadDeck.isTriggered(_cardNumber)) {
-			_crossroadDeck.loadCardtoPanel(_cardNumber);
 			switch(_cardNumber) {
 			case 1: 
 				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
@@ -535,7 +553,7 @@ public class GameFrame extends JFrame implements ActionListener {
 				} break;
 			/*case 73:
 				if() {
-					_crossroadDeck.card73();
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
 				} break;*/ //Fix a player count on a location
 			case 74:
 				if(_actionsSel.equals("Search") && _loc.equals("Gas Station")) {
@@ -568,9 +586,9 @@ public class GameFrame extends JFrame implements ActionListener {
 				} break;
 			}
 		}
-		else { // Uncomment this as all crossroadcards are finished!
+		/*else { // Uncomment this as all crossroadcards are finished!
 			_cardNumber = rand.nextInt(82) + 1;
 			checkCard();
-		}
+		}*/
 	}
 }
