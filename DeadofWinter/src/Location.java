@@ -54,14 +54,16 @@ public class Location {
 	}
 	
 	public void remZombies(int num) {
-		if(zombies>0)
-			zombies = zombies - num;
+		zombies = zombies - num;
+		if(zombies < 0)
+			zombies = 0;
 		
 	}
 	
 	public void remBaracade(int num) {
-		if(baracades>0)
-			baracades = baracades - num;
+		baracades = baracades - num;
+		if(baracades < 0)
+			baracades = 0;
 	}
 	
 	public boolean isThere(String charName) {

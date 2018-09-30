@@ -55,7 +55,9 @@ public class MainFrame extends JFrame implements ActionListener{
 				"Maria Lopez", "Olivia Brown", "Rod Miller", "Sophie Robinson", "Sparky",
 			     "Thomas Heart", "Talia Jones"
 			     }; 
-		private JCheckBox[] _listChars = new JCheckBox[totalnumchars];
+		private JCheckBox[] _listChars = new JCheckBox[labels.length];
+		//private JCheckBox[] _listChars = new JCheckBox[totalnumchars];
+		
 		private String[] _charDeck;
 		private String[] _active;
 		
@@ -134,7 +136,7 @@ public class MainFrame extends JFrame implements ActionListener{
 			_buttonPanel = new JPanel();
 			
 			_addPbutton = new JButton("Add Player");
-			_playerName = new JLabel("Player Name");
+			_playerName = new JLabel("Name of Player 1");////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			_NP = new JTextField(20);
 			_container = new JPanel(new GridLayout(8,4));
 			_container.setAlignmentY(JComponent.LEFT_ALIGNMENT);
@@ -211,6 +213,7 @@ public class MainFrame extends JFrame implements ActionListener{
 				}
 				else {
 					clearCheckbox();
+					_playerName.setText("Name of Player " + (count+1));
 					_NP.setText("");
 				}
 			}

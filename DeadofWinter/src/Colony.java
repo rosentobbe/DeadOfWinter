@@ -21,12 +21,12 @@ public class Colony extends Location{
 			helpless = helpless - num;
 	}
 	
-	public void addWaste() {
-		waste++;
+	public void addWaste(int num) {
+		waste = waste + num;
 	}
 	public void remWaste(int num) {
 		waste = waste - num;
-		if(waste<0)
+		if(waste < 0)
 			waste = 0;
 	}
 	public int getWaste() {

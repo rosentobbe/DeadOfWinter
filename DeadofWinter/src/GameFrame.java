@@ -53,7 +53,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	private JButton _remChar;
 	private JButton _nextTurn;
 	private JButton _actionsButton;
-	private JSpinner _numberof;
+	private JSpinner _numberofWaste;
 	private JLabel _player;
 	private Character[] _playerChars;
 	private JTextArea _infoChar;
@@ -160,14 +160,14 @@ public class GameFrame extends JFrame implements ActionListener {
 		_addremChar = new JPanel(new GridLayout(0, 2));
 		_waste = new JPanel(new GridLayout(0, 2));
 		_clearWastePanel = new JPanel(new GridLayout(2,0));
-		_numberof = new JSpinner(new SpinnerNumberModel(0, 0, 5, 1));
+		_numberofWaste = new JSpinner(new SpinnerNumberModel(0, 0, 5, 1));
 		_addremChar.add(_addChar);
 		_addremChar.add(_remChar);
 		_nextTurn = new JButton("Next Turn");
 		_waste.add(_addWaste);
 		_waste.add(_clearWastePanel);
 		_clearWastePanel.add(_clearWaste);
-		_clearWastePanel.add((Component) _numberof);
+		_clearWastePanel.add((Component) _numberofWaste);
 		_actions1.setLayout(new GridLayout(4,1));
 		_actions1.add(_actionsButton);
 		_actions1.add(_waste);
@@ -282,7 +282,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			return true;
 		return false;
 	}	
-	public boolean isCharAtLocation(String _locName) {
+	public boolean anyCharAtSpecificLocation(String _locName) {
 		ArrayList charNames = _playerArray[_whosTurn].getCharList();
 		for(int i = 0; i < charNames.size(); i++)
 			if(_playerArray[_whosTurn].getCharPos(charNames.get(i).toString()).equals(_locName))
@@ -299,18 +299,29 @@ public class GameFrame extends JFrame implements ActionListener {
 		}
 		return playerControllingSurvivor;
 	}
-	public void samePlayerControllingSurvivor(ArrayList<String> survivors){
+	public int[] whichPlayersContollAtThisLocation(ArrayList<String> survivors){
 		int[] whoControllsSearch = new int[survivors.size()];
 		for(int i = 0; i < survivors.size(); i++) {
 			whoControllsSearch[i] = whoControllsSurvivor(survivors.get(i));
 		}
+		return whoControllsSearch;
 	}
+	public int numberOfCharsPlayerControlls(int[] ArrayWithPlayernumbers, int whichPlayer) {
+		int numberofChars = 0;
+		for(int i = 0; i< ArrayWithPlayernumbers.length; i++) {
+			if(ArrayWithPlayernumbers[i] == whichPlayer)
+				numberofChars++;
+		}
+		return numberofChars;
+	}
+	
+	
 	public void checkboxes() {
 		boxGroup = new CheckboxGroup();
 		for(int i=0; i<_charString.length; i++) {
 			_charBox[i] = new Checkbox(_charString[i], boxGroup, true);
 			_boxPanel.add(_charBox[i], boxGroup);
-		}
+	}
 	}
 	
 	public void getInfo() {
@@ -390,10 +401,8 @@ public class GameFrame extends JFrame implements ActionListener {
 					_Errorlable.setText(_actionsSel + _ErrorText_SearchColony);
 					_dropPanel.add(_Errorlable);
 				}
-				else if(error_cancel == 1 && _Errorlable.getParent().equals(_dropPanel)) {
-					error_cancel = 0;
+				else
 					_dropPanel.remove(_Errorlable);
-				}
 			}
 			else if(_actionsSel.equals("Use Weapon")) {
 				useWeaponIfPossible();
@@ -414,10 +423,12 @@ public class GameFrame extends JFrame implements ActionListener {
 			_dropPanel.repaint();
 		}
 		else if(source.equals(_clearWaste)) {
-			_colony.remWaste((int)_numberof.getValue());
+			_colony.remWaste((int)_numberofWaste.getValue());
+			_numberofWaste.setValue(0);
 		}
 		else if(source.equals(_addWaste)) {
-			_colony.addWaste();
+			_colony.addWaste((int)_numberofWaste.getValue());
+			_numberofWaste.setValue(0);
 		}
 		else if(source.equals(_addChar)) {
 			_AddorRem = ADD;
@@ -494,8 +505,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			_dropPanel.add(_Errorlable);
 		}
 		else {
-			if(error_cancel == 1 && _Errorlable.getParent().equals(_dropPanel)) 
-				_dropPanel.remove(_Errorlable);
+			_dropPanel.remove(_Errorlable);
 			for(int i=0; i < _ListLoc.size(); i++) {
 				if(_ListLoc.get(i).getName().equals(_loc)){
 					_ListLoc.get(i).remZombies(1);
@@ -511,10 +521,10 @@ public class GameFrame extends JFrame implements ActionListener {
 			_Errorlable.setText(_actionsSel + _ErrorText_moveSameLoc);
 			_dropPanel.add(_Errorlable);
 		}
-		else if(error_cancel == 1 && _Errorlable.getParent().equals(_dropPanel)) 
+		else{
 			_dropPanel.remove(_Errorlable);
-		else
 			moveTo(_loc, _char);
+		}
 	}
 	
 	private void resolveCardOption(int cardNumber) {
@@ -523,16 +533,19 @@ public class GameFrame extends JFrame implements ActionListener {
 	}
 	
 	private void solveCardEffect(int selectedOption, int onCard) {
-		if(onCard == 1 ) {
-			if(selectedOption == 1)
-				moveTo("Colony", _char);
-		}
+		if(onCard == 1 && selectedOption == 1 ) 
+			moveTo("Colony", _char);
+		else if(onCard == 69 && selectedOption == 2)
+			_library.remZombies(1);
+		else if(onCard == 70 && selectedOption == 1)
+			_colony.addZombies(5);
+		
 	}
 	
 	public void checkCard() {
 		/**************************/
 		_cardNumber = rand.nextInt(82) + 1;
-		_cardNumber = 1;
+		_cardNumber = 68;
 		/****************************/
 
 		if(!_crossroadDeck.isTriggered(_cardNumber)) {
@@ -541,20 +554,41 @@ public class GameFrame extends JFrame implements ActionListener {
 				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 					_crossroadDeck.loadCardtoPanel(_cardNumber);
 				} break;
+			case 67:
 				
+			case 68:
+				if(_actionsSel.equals("Move"))
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				break;
+			case 69:
+				if(_actionsSel.equals("Search") && _currcharpos.equals("Library") && isCharExiled(_char) == 0)
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				break;
+			case 70:
+				if(_actionsSel.equals("Search") && _currcharpos.equals("Hospital"))
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				break;
 			case 71:
 				if(_playerArray[_whosTurn].controlsChar("Janet Taylor") && (isCharExiled("Janet Taylor")==0)) {
-					System.out.println("Triggered!");
-					//_crossroadDeck.card71();
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
 				} break;				
 			case 72:
-				if(isCharAtLocation("Colony")) {
+				if(anyCharAtSpecificLocation("Colony")) {
 					_crossroadDeck.loadCardtoPanel(_cardNumber);
 				} break;
-			/*case 73:
-				if() {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;*/ //Fix a player count on a location
+			case 73:
+				for(int i = 0; i < _ListLoc.size(); i++) {
+					if(_ListLoc.get(i).getNumSurvivors() == 2) {
+						if(numberOfCharsPlayerControlls(
+												whichPlayersContollAtThisLocation(_ListLoc.get(i).getSurvivors())
+												, _whosTurn) 
+												== 1) {
+							_crossroadDeck.loadCardtoPanel(_cardNumber);
+							break;
+						}
+					}
+				}
+				break;
 			case 74:
 				if(_actionsSel.equals("Search") && _loc.equals("Gas Station")) {
 					_crossroadDeck.loadCardtoPanel(_cardNumber);

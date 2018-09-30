@@ -71,6 +71,7 @@ public class Crossroads extends JFrame implements ActionListener{
 		topPanel = new JPanel();
 		_infoField = new JTextArea();
 		_infoField.setLineWrap(true);
+		_infoField.setWrapStyleWord(true);
 		//_infoField.setContentType("text/html");
 		_infoField.setFont(new Font("Arial", Font.PLAIN, 15));
 		_infoField.setSize(new Dimension(650, 450));
