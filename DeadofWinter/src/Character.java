@@ -3,7 +3,7 @@ public class Character {
 	private String _name;
 	private String _position;
 	private String _gender;
-	private int _status; // 0=Non-Exiled, 1=Exiled
+	private int _status = 1; // 0=Non-Exiled, 1=Exiled ÄNDRA TILL 0!!!!!!!!!!
 	private String _male[] = {"Kodiak Colby", "Arthur Thurston", "Andrew Evans", "David Garcia", "Thomas Heart", "Daniel Smith", "Brandon Kane",
 							"Gabriel Diaz", "John Price", "James Meyers", "Brian Lee", "Rod Miller", "Gray Beard", "Harman Brooks", "Mike Cho", 
 							"Buddy Davis", "Edward White", "Forest Plum"} ;

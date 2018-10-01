@@ -535,6 +535,16 @@ public class GameFrame extends JFrame implements ActionListener {
 	private void solveCardEffect(int selectedOption, int onCard) {
 		if(onCard == 1 && selectedOption == 1 ) 
 			moveTo("Colony", _char);
+		else if(onCard == 65) {
+			if(selectedOption == 1) {
+				for(int i = 0; i < _ListLoc.size(); i++) {
+					if(_ListLoc.get(i).getName() != "Colony")
+						_ListLoc.get(i).addZombies(1);
+				}
+			}
+			else if(selectedOption == 2)
+				_playerArray[_whosTurn].removeChar("Annaleigh Chan");
+		}
 		else if(onCard == 69 && selectedOption == 2)
 			_library.remZombies(1);
 		else if(onCard == 70 && selectedOption == 1)
@@ -545,17 +555,32 @@ public class GameFrame extends JFrame implements ActionListener {
 	public void checkCard() {
 		/**************************/
 		_cardNumber = rand.nextInt(82) + 1;
-		_cardNumber = 68;
+		_cardNumber = 65;
 		/****************************/
-
 		if(!_crossroadDeck.isTriggered(_cardNumber)) {
 			switch(_cardNumber) {
 			case 1: 
 				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 					_crossroadDeck.loadCardtoPanel(_cardNumber);
 				} break;
+			case 63:
+				break; 
+			case 64:
+				if(_playerArray[_whosTurn].controlsChar("Andrew Evans") && isCharExiled("Andrew Evans") == 0)
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				break;
+			case 65:
+				if(_playerArray[_whosTurn].controlsChar("Annaleigh Chan") && isCharExiled("Annaleigh Chan") == 0)
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				break;
+			case 66:
+				if(_playerArray[_whosTurn].controlsChar("David Garcia") && isCharExiled("David Garcia") == 0)
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				break;
 			case 67:
-				
+				if(!anyCharAtSpecificLocation("Colony"))
+					_crossroadDeck.loadCardtoPanel(_cardNumber);
+				break;
 			case 68:
 				if(_actionsSel.equals("Move"))
 					_crossroadDeck.loadCardtoPanel(_cardNumber);
