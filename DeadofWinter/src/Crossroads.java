@@ -20,6 +20,7 @@ import bsh.Interpreter;
 public class Crossroads extends JFrame implements ActionListener{
 	private int[] _triggerStatus; // 1: Already triggered, 0: Not triggered.
 	private CSVParser collectCardsFromFile;
+	private int numberOfCards;
 	//private ArrayList<String[]> DrawDeckofCrossroadCards;
 	private JPanel window;
 	private JPanel topPanel;
@@ -59,7 +60,8 @@ public class Crossroads extends JFrame implements ActionListener{
 		_ListLoc = _lLoc;
 		collectCardsFromFile = new CSVParser();
 		collectCardsFromFile.ParseCSVFileWithCards();
-		_triggerStatus = new int[collectCardsFromFile.getNumberOfCards()-1];
+		numberOfCards = collectCardsFromFile.getNumberOfCards()-1;
+		_triggerStatus = new int[numberOfCards];
 		for(int i=0; i < _triggerStatus.length; i++)
 			_triggerStatus[i] = 0;
 		this.setLocationRelativeTo(null);
@@ -105,7 +107,9 @@ public class Crossroads extends JFrame implements ActionListener{
 //		hosp = ho;
 //		gas = ga;
 //	}
-	
+	public int getNumberofCards() {
+		return numberOfCards;
+	}
 	public boolean isTriggered(int index) {
 		if(_triggerStatus[index] == 0)
 			return false;

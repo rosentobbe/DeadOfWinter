@@ -68,15 +68,17 @@ public class Player {
 	
 	public void removeChar(String charName) {
 		//characters = ArrayUtils.removeElement(characters, charName);
+		System.out.println("In remove char");
 		int i, j;
 		for(i=0; i<numChar; i++) {
 			if(characters[i].getName().equals(charName)) {
+				System.out.println("In if");
 				for(j=i; j<numChar-1;j++) {
 					characters[j] = characters[j+1];
 				}
-				characters[numChar-1].setName("\0");
 			}
-		}
+		}// Något är fel här!! kan inte ersätta den sista i arrayen1!!!!!
+		//characters[numChar-1].setName(String.valueOf(numChar));
 		//System.out.println(Arrays.toString(characters));
 		charnames.remove(charName);
 		numChar--;
