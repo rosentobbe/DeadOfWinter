@@ -2,6 +2,7 @@
 public class Character {
 	private String _name;
 	private String _position;
+	private String _StartedIn;
 	private String _gender;
 	private int _status = 0; // 0=Non-Exiled, 1=Exiled 
 	private String _male[] = {"Kodiak Colby", "Arthur Thurston", "Andrew Evans", "David Garcia", "Thomas Heart", "Daniel Smith", "Brandon Kane",
@@ -10,10 +11,13 @@ public class Character {
 	
 	public Character(String charName) {
 		_name = charName;
-		_gender = "f";
+		setGender();
 	}
 	public Character() {
-		_gender = "f";
+		setGender();
+	}
+	public String getStartPosition() {
+		return _StartedIn;
 	}
 	public String getPosition() {
 		return _position;
@@ -26,7 +30,9 @@ public class Character {
 	public String getGender() {
 		return _gender;
 	}
-	
+	public void setStartPosition(String startPosition){
+		_StartedIn = startPosition;
+	}
 	public void setPosition(String newPos) {
 		_position = newPos;
 	}
@@ -36,11 +42,18 @@ public class Character {
 	}
 	
 	public void setGender() {
+		boolean male = false;
 		if(_name.equals("Sparky"))
 			_gender = "d";
-		for(int i=0; i < _male.length; i++ ) {
-			if(_name.equals(_male[i]))
-				_gender = "m";
+		else {
+			for(int i=0; i < _male.length; i++ ) {
+				if(_name.equals(_male[i])) {
+					male = true;
+					_gender = "m";
+				}
+			}
+			if(!male)
+				_gender = "f";
 		}
 	}
 	public void setStatus(int newstatus) {

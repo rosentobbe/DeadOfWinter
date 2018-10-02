@@ -18,6 +18,7 @@ import javax.swing.JTextPane;
 import bsh.Interpreter;
 
 public class Crossroads extends JFrame implements ActionListener{
+	private boolean drawnThisRound = false;
 	private int[] _triggerStatus; // 1: Already triggered, 0: Not triggered.
 	private CSVParser collectCardsFromFile;
 	private int numberOfCards;
@@ -89,24 +90,26 @@ public class Crossroads extends JFrame implements ActionListener{
 		this.add(buttonPanel, BorderLayout.PAGE_END);
 		_optB_1 = new JButton("Option 1");
 		_optB_2 = new JButton("Option 2");
+		_optB_3 = new JButton("Option 3");
 
 		//Adding all listeners!
 		_optB_1.addActionListener(this);
 		_optB_2.addActionListener(this);
+		_optB_3.addActionListener(this);
 
 		_Con = new JButton("Continue");
 		_Con.addActionListener(this);
 	}
-//	public void setLocation(Colony _col, Location po, Location gr, Location li, 
-//			Location sc, Location ho, Location ga) {
-//		colony = _col;
-//		police = po;
-//		groc = gr;
-//		lib = li;
-//		school = sc;
-//		hosp = ho;
-//		gas = ga;
-//	}
+	
+	public void drawACard() {
+		drawnThisRound = true;
+	}
+	public void resetDrawnThisRound() {
+		drawnThisRound = false;
+	}
+	public boolean alreadyDrawnThisRound() {
+		return drawnThisRound;
+	}
 	public int getNumberofCards() {
 		return numberOfCards;
 	}
@@ -175,6 +178,7 @@ public class Crossroads extends JFrame implements ActionListener{
 
 	public void loadCardtoPanel(int whichCard) {
 		String completeCardText;
+		drawACard();
 		_selectedOption = 0;
 		_triggerStatus[whichCard] = 1;
 		_cardTitle.setText(collectCardsFromFile.getTitle(whichCard)); //Title of the cards
@@ -182,7 +186,7 @@ public class Crossroads extends JFrame implements ActionListener{
 		_currSetup = collectCardsFromFile.getSetup(whichCard) + "\n"; //Setup/intro text for the card
 		_Opt1S = collectCardsFromFile.getOptionOneShort(whichCard); //Option 1 Short
 		_Opt2S = collectCardsFromFile.getOptionTwoShort(whichCard); //Option 2 short
-		//_Opt3S = ""; //OPtion 3 short
+		_Opt3S = ""; //OPtion 3 short
 		_Opt1F = collectCardsFromFile.getOptionOne(whichCard); //Option 1 Full
 		_Opt2F = collectCardsFromFile.getOptionTwo(whichCard); //Option 2 FUll
 		_Opt3F = collectCardsFromFile.getOptionThree(whichCard); //Option 3 FUll

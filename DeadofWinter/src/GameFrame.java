@@ -91,6 +91,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	private JComboBox _actionsDrop;
 	
 	//Crossroad
+	private boolean alreadyDrawThisTurn = false;
 	private Crossroads _crossroadDeck;
 	private int _cardNumber;
 	private Random rand;
@@ -206,6 +207,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		
 		getInfo();
 		placeAllChars();
+		_playerArray[_whosTurn].setCharStartPos();
 
 		_mainCard.add(_actions1, "action1");
 		_mainFrame.add(_name, BorderLayout.PAGE_START);
@@ -245,7 +247,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		_crossroadDeck = new Crossroads(_playerArray, _ListLoc);
 		_crossroadDeck.setAlwaysOnTop(true);
 		rand = new Random();
-		_cardNumber = rand.nextInt(82) + 1;
+		_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
 		checkCard();
 		
 		//Add listeners
@@ -359,15 +361,17 @@ public class GameFrame extends JFrame implements ActionListener {
 		}
 	}	
 	public void moveTo(String _newLoc, String _chartoMove) {
-		for(int i=0; i < _ListLoc.size(); i++) {
-			if(_ListLoc.get(i).isThere(_chartoMove))
-				_ListLoc.get(i).remSurvivor(_chartoMove);
-			else if(_ListLoc.get(i).getName().equals(_newLoc)) {
-				_ListLoc.get(i).addSurvivor(_chartoMove);
+		if(!isCharAtLocation(_chartoMove, _newLoc)) {
+			for(int i=0; i < _ListLoc.size(); i++) {
+				if(_ListLoc.get(i).isThere(_chartoMove))
+					_ListLoc.get(i).remSurvivor(_chartoMove);
+				else if(_ListLoc.get(i).getName().equals(_newLoc)) {
+					_ListLoc.get(i).addSurvivor(_chartoMove);
+				}
+					
 			}
-				
+			_playerArray[_whosTurn].setCharPos(_chartoMove, _newLoc);
 		}
-		_playerArray[_whosTurn].setCharPos(_chartoMove, _newLoc);
 	}
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -500,7 +504,9 @@ public class GameFrame extends JFrame implements ActionListener {
 				_whosTurn = _started;
 				_round--;
 			}
-			_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards());
+			_crossroadDeck.resetDrawnThisRound();
+			_playerArray[_whosTurn].setCharStartPos();
+			_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
 			resetVariables();
 			checkCard();
 		}
@@ -549,6 +555,20 @@ public class GameFrame extends JFrame implements ActionListener {
 	private void solveCardEffect(int selectedOption, int onCard) {
 		if(onCard == 1 && selectedOption == 1 ) 
 			moveTo("Colony", _char);
+		else if(onCard == 56) {
+			if(selectedOption == 1) {
+				_playerArray[_whosTurn].addChar("John Price");
+				_charDeck.remove("John Price");
+				for(int i = 0; i < _ListLoc.size(); i++) {
+					if(((Location)_ListLoc.get(i)).getName() != "School")
+						((Location)_ListLoc.get(i)).addZombies(2);
+				}
+			}
+			else if(selectedOption == 2) {
+				_charDeck.remove("John Price");
+				_deathDeck.add("John Price");
+			}
+		}
 		else if(onCard == 65) {
 			if(selectedOption == 1) {
 				for(int i = 0; i < _ListLoc.size(); i++) {
@@ -570,104 +590,135 @@ public class GameFrame extends JFrame implements ActionListener {
 	
 	public void checkCard() {
 		/**************************/
-		_cardNumber = 62;
+		_cardNumber = 56;
 		/****************************/
-		if(!_crossroadDeck.isTriggered(_cardNumber)) {
-			switch(_cardNumber) {
-			case 1: 
-				if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 62: 
-				if(!_charDeck.contains("Edward White") && !_charDeck.contains("John Price") && !_deathDeck.contains("Edward White") && !_deathDeck.contains("John Price"))
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 63: // ******* not done *******
-				System.out.println("Do this card!!");	
-				break; 
-			case 64:
-				if(_playerArray[_whosTurn].controlsChar("Andrew Evans") && isCharExiled("Andrew Evans") == 0)
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 65:
-				if(_playerArray[_whosTurn].controlsChar("Annaleigh Chan") && isCharExiled("Annaleigh Chan") == 0)
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 66:
-				if(_playerArray[_whosTurn].controlsChar("David Garcia") && isCharExiled("David Garcia") == 0)
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 67:
-				if(!anyCharAtSpecificLocation("Colony"))
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 68:
-				if(_actionsSel.equals("Move"))
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 69:
-				if(_actionsSel.equals("Search") && _currcharpos.equals("Library") && isCharExiled(_char) == 0)
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 70:
-				if(_actionsSel.equals("Search") && _currcharpos.equals("Hospital"))
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				break;
-			case 71:
-				if(_playerArray[_whosTurn].controlsChar("Janet Taylor") && (isCharExiled("Janet Taylor")==0)) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;				
-			case 72:
-				if(anyCharAtSpecificLocation("Colony")) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 73:
-				for(int i = 0; i < _ListLoc.size(); i++) {
-					if(_ListLoc.get(i).getNumSurvivors() == 2) {
-						if(numberOfCharsPlayerControlls(
-												whichPlayersContollAtThisLocation(_ListLoc.get(i).getSurvivors())
-												, _whosTurn) 
-												== 1) {
-							_crossroadDeck.loadCardtoPanel(_cardNumber);
-							break;
+		if(!_crossroadDeck.alreadyDrawnThisRound()) {
+			if(!_crossroadDeck.isTriggered(_cardNumber)) {
+				switch(_cardNumber) {
+				case 1: 
+					if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 56:
+					if(_actionsSel.equals("Search") && _currcharpos.equals("School") && _charDeck.contains("John Price"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 57:
+					if(_playerArray[_whosTurn].controlsChar("Ashley Ross") && (_playerArray[_whosTurn].isExiled("Ashley Ross") == 0))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 58:
+					if(_playerArray[_whosTurn].controlsChar("Edward White") && (_playerArray[_whosTurn].isExiled("Edward White") == 0))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 59:
+					if(_actionsSel.equals("Search") && _currcharpos.equals("Police Station"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 60: // Yawn Card Replace with a new one, for now it will randomize a new number.
+					_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
+					checkCard();
+					break;
+				case 61:
+					if(_playerArray[_whosTurn].controlsChar("Buddy Davis") && (_playerArray[_whosTurn].getCharStartPos("Buddy Davis") == "Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 62: 
+					if(!_charDeck.contains("Edward White") && !_charDeck.contains("John Price") && !_deathDeck.contains("Edward White") && !_deathDeck.contains("John Price"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 63: // ******* not done *******
+					System.out.println("Do this card!!");	
+					break; 
+				case 64:
+					if(_playerArray[_whosTurn].controlsChar("Andrew Evans") && isCharExiled("Andrew Evans") == 0) {
+						moveTo("Grocery Store", "Andrew Evans");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 65:
+					if(_playerArray[_whosTurn].controlsChar("Annaleigh Chan") && isCharExiled("Annaleigh Chan") == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 66:
+					if(_playerArray[_whosTurn].controlsChar("David Garcia") && isCharExiled("David Garcia") == 0) {
+						moveTo("Colony", "David Garcia");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 67:
+					if(!anyCharAtSpecificLocation("Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 68:
+					if(_actionsSel.equals("Move"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 69:
+					if(_actionsSel.equals("Search") && _currcharpos.equals("Library") && isCharExiled(_char) == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 70:
+					if(_actionsSel.equals("Search") && _currcharpos.equals("Hospital"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 71:
+					if(_playerArray[_whosTurn].controlsChar("Janet Taylor") && (isCharExiled("Janet Taylor")==0)) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;				
+				case 72:
+					if(anyCharAtSpecificLocation("Colony")) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 73:
+					for(int i = 0; i < _ListLoc.size(); i++) {
+						if(_ListLoc.get(i).getNumSurvivors() == 2) {
+							if(numberOfCharsPlayerControlls(
+													whichPlayersContollAtThisLocation(_ListLoc.get(i).getSurvivors())
+													, _whosTurn) 
+													== 1) {
+								_crossroadDeck.loadCardtoPanel(_cardNumber);
+								break;
+							}
 						}
 					}
+					break;
+				case 74:
+					if(_actionsSel.equals("Search") && _loc.equals("Gas Station")) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 75:
+					if(_playerArray[_whosTurn].controlsChar("Carla Thompson") && (isCharExiled("Carla Thompson")==0)) {
+						moveTo("Police Station", "Carla Thompson");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 76:
+					if(_actionsSel.equals("Search") && _char.equals("Jenny Clark")) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 77:
+					if(_actionsSel.equals("Move") && !_consi.equals("Wound") && !_consi.equals("Zombiebite")) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 78:
+					if(_playerArray[_whosTurn].controlsChar("Loretta Clay") && (isCharExiled("Loretta Clay")==0)) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 79:
+					if(_actionsSel.equals("Move") && isCharExiled(_char)==0) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 80:
+					if(!_charDeck.contains("Harman Brooks") && (isCharExiled("Harman Brooks")==0)) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				default: 
+					System.out.println("In switchcase Card " + _cardNumber + " doesnot exist!");
+					break;
 				}
-				break;
-			case 74:
-				if(_actionsSel.equals("Search") && _loc.equals("Gas Station")) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 75:
-				if(_playerArray[_whosTurn].controlsChar("Carla Thompson") && (isCharExiled("Carla Thompson")==0)) {
-					moveTo("Police Station", "Carla Thompson");
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 76:
-				if(_actionsSel.equals("Search") && _char.equals("Jenny Clark")) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 77:
-				if(_actionsSel.equals("Move") && !_consi.equals("Wound") && !_consi.equals("Zombiebite")) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 78:
-				if(_playerArray[_whosTurn].controlsChar("Loretta Clay") && (isCharExiled("Loretta Clay")==0)) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 79:
-				if(_actionsSel.equals("Move") && isCharExiled(_char)==0) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
-			case 80:
-				if(!_charDeck.contains("Harman Brooks") && (isCharExiled("Harman Brooks")==0)) {
-					_crossroadDeck.loadCardtoPanel(_cardNumber);
-				} break;
 			}
+			/*else { // Uncomment this as all crossroadcards are finished!
+				_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
+				checkCard();
+			}*/
 		}
-		/*else { // Uncomment this as all crossroadcards are finished!
-			_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards());
-			checkCard();
-		}*/
 	}
 }
