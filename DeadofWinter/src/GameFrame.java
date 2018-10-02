@@ -286,11 +286,25 @@ public class GameFrame extends JFrame implements ActionListener {
 			return true;
 		return false;
 	}	
+	public boolean allCharAtSpecificLocation(String _locName) {
+		ArrayList charNames = _playerArray[_whosTurn].getCharList();
+		int charsAtLocation = 0;
+		for(int i = 0; i < charNames.size(); i++) {
+			if(_playerArray[_whosTurn].getCharPos(charNames.get(i).toString()).equals(_locName))
+				charsAtLocation++;
+		}
+		if(charsAtLocation == _playerArray[_whosTurn].getNumchars())
+			return true;
+		else
+			return false;
+	}
 	public boolean anyCharAtSpecificLocation(String _locName) {
 		ArrayList charNames = _playerArray[_whosTurn].getCharList();
-		for(int i = 0; i < charNames.size(); i++)
+		int charsAtLocation = 0;
+		for(int i = 0; i < charNames.size(); i++) {
 			if(_playerArray[_whosTurn].getCharPos(charNames.get(i).toString()).equals(_locName))
 				return true;
+		}
 		return false;
 	}
 	public int whoControllsSurvivor(String survivorName) {
@@ -590,7 +604,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	
 	public void checkCard() {
 		/**************************/
-		_cardNumber = 56;
+		_cardNumber = 55;
 		/****************************/
 		if(!_crossroadDeck.alreadyDrawnThisRound()) {
 			if(!_crossroadDeck.isTriggered(_cardNumber)) {
@@ -599,6 +613,16 @@ public class GameFrame extends JFrame implements ActionListener {
 					if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
+				case 54:
+					// ************** här är vi *******************
+				case 55: // FIX RESOLVE CARD FOR THIS ONE!!!!!
+					if(!allCharAtSpecificLocation("Colony") && _charDeck.contains("Mike Cho")){
+						for(int i = 0; i < _ListLoc.size(); i++){
+							if(anyCharAtSpecificLocation(_ListLoc.get(i).getName()) && (_ListLoc.get(i).getNumZom() > 0) && (_ListLoc.get(i).getName()!="Colony"))
+									_crossroadDeck.loadCardtoPanel(_cardNumber);		
+						}
+					}
+					break;
 				case 56:
 					if(_actionsSel.equals("Search") && _currcharpos.equals("School") && _charDeck.contains("John Price"))
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
@@ -645,7 +669,7 @@ public class GameFrame extends JFrame implements ActionListener {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
 				case 67:
-					if(!anyCharAtSpecificLocation("Colony"))
+					if(!allCharAtSpecificLocation("Colony"))
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					break;
 				case 68:
