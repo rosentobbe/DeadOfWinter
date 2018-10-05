@@ -575,12 +575,12 @@ public class GameFrame extends JFrame implements ActionListener {
 	private void solveCardEffect(int selectedOption, int onCard) {
 		if(onCard == 1 && selectedOption == 1 ) 
 			moveTo("Colony", _char);
-		else if(onCard == 49 && selectedOption == 3) {
+		else if(onCard == 48 && selectedOption == 1)
+			_colony.addHelpless(numbPlayers);
+		else if(onCard == 49 && selectedOption == 3) 
 			_colony.remHelpless(1);
-		}
-		else if(onCard == 50 && selectedOption == 1) {
+		else if(onCard == 50 && selectedOption == 1) 
 			_colony.remHelpless(2);
-		}
 		else if(onCard == 52) {
 			if(selectedOption == 1) {
 				_deathDeck.add("Sophie Robinson");
@@ -636,7 +636,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	
 	public void checkCard() {
 		/**************************/
-		_cardNumber = 49;
+		_cardNumber = 48;
 		/****************************/
 		if(!_crossroadDeck.alreadyDrawnThisRound()) {
 			if(!_crossroadDeck.isTriggered(_cardNumber)) {
@@ -645,6 +645,10 @@ public class GameFrame extends JFrame implements ActionListener {
 					if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
+				case 47:
+					if(_actionsSel.equals("Move") && isCharExiled(_char) == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
 				case 48:
 					if(anyCharAtSpecificLocation("Colony"))
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
