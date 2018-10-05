@@ -277,7 +277,6 @@ public class GameFrame extends JFrame implements ActionListener {
 	}
 	public int isCharExiled(String _charName) {
 		int status = -1;
-		System.out.println(_charName);
 		for(int i=0; i < numbPlayers; i++) {
 			status = _playerArray[i].isExiled(_charName);
 		}
@@ -575,6 +574,12 @@ public class GameFrame extends JFrame implements ActionListener {
 	private void solveCardEffect(int selectedOption, int onCard) {
 		if(onCard == 1 && selectedOption == 1 ) 
 			moveTo("Colony", _char);
+		else if(onCard == 45 && selectedOption == 2)
+			_playerArray[_whosTurn].removeChar(_char);
+		else if(onCard == 47 && selectedOption == 1) {
+			for(int i=0; i < _ListLoc.size(); i++)
+				_ListLoc.get(i).remZombies(1);
+		}
 		else if(onCard == 48 && selectedOption == 1)
 			_colony.addHelpless(numbPlayers);
 		else if(onCard == 49 && selectedOption == 3) 
@@ -588,7 +593,6 @@ public class GameFrame extends JFrame implements ActionListener {
 					if(_playerArray[i].getCharList().contains("Sophie Robinson"))
 						_playerArray[i].removeChar("Sophie Robinson");
 				}
-				
 				for(int i=0; i < _ListLoc.size(); i++) {
 					if(((Location)_ListLoc.get(i)).isThere(_char))
 						((Location)_ListLoc.get(i)).remSurvivor(_char);
@@ -636,7 +640,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	
 	public void checkCard() {
 		/**************************/
-		_cardNumber = 48;
+		_cardNumber = 38;
 		/****************************/
 		if(!_crossroadDeck.alreadyDrawnThisRound()) {
 			if(!_crossroadDeck.isTriggered(_cardNumber)) {
@@ -645,6 +649,35 @@ public class GameFrame extends JFrame implements ActionListener {
 					if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
+				case 38: //Put card on char.
+					if(anyCharAtSpecificLocation("Library"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 39: 
+					if(_actionsSel.equals("Move") && isCharExiled(_char) == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 40:// Dont know how to do this! Maybe put another parameter on chars?
+				case 41: // Fix the solvecard for this one! Dont really know how to do with the pick survivors!
+					if(!_charDeck.contains("Rod Miller") && !_deathDeck.contains("Rod Miller"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 44: case 43: case 42: 
+					if(anyCharAtSpecificLocation("Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 45:
+					if(_actionsSel.equals("Move") && _consi.equals("Frostbite")) {
+						for(int i = 0; i < _ListLoc.size(); i++) {
+							if(_ListLoc.get(i).getNumSurvivors()>0)
+								_crossroadDeck.loadCardtoPanel(_cardNumber);
+						}
+					}
+					break;
+				case 46:
+					if(anyCharAtSpecificLocation("Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
 				case 47:
 					if(_actionsSel.equals("Move") && isCharExiled(_char) == 0)
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
