@@ -29,6 +29,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	private JPanel _cardPanel;
 	private CardLayout _deck;
 	private int numbPlayers;
+	private int wasteStatus = 0; //0: Not touched waste, 1:added Waste, -1:Clear Waste
 	private int _started = 0;
 	private int _whosTurn = 0;
 	private int _round = 0;
@@ -272,6 +273,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		_actionsSel = "";
 		_loc = "";
 		_char = "";
+		wasteStatus = 0;
 	}
 	public int isCharExiled(String _charName) {
 		int status = -1;
@@ -299,8 +301,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			return false;
 	}
 	public boolean anyCharAtSpecificLocation(String _locName) {
-		ArrayList charNames = _playerArray[_whosTurn].getCharList();
-		int charsAtLocation = 0;
+		ArrayList<String> charNames = _playerArray[_whosTurn].getCharList();
 		for(int i = 0; i < charNames.size(); i++) {
 			if(_playerArray[_whosTurn].getCharPos(charNames.get(i).toString()).equals(_locName))
 				return true;
@@ -339,7 +340,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		for(int i=0; i<_charString.length; i++) {
 			_charBox[i] = new Checkbox(_charString[i], boxGroup, true);
 			_boxPanel.add(_charBox[i], boxGroup);
-	}
+		}
 	}
 	
 	public void getInfo() {
@@ -379,10 +380,8 @@ public class GameFrame extends JFrame implements ActionListener {
 			for(int i=0; i < _ListLoc.size(); i++) {
 				if(_ListLoc.get(i).isThere(_chartoMove))
 					_ListLoc.get(i).remSurvivor(_chartoMove);
-				else if(_ListLoc.get(i).getName().equals(_newLoc)) {
+				else if(_ListLoc.get(i).getName().equals(_newLoc))
 					_ListLoc.get(i).addSurvivor(_chartoMove);
-				}
-					
 			}
 			_playerArray[_whosTurn].setCharPos(_chartoMove, _newLoc);
 		}
@@ -443,10 +442,12 @@ public class GameFrame extends JFrame implements ActionListener {
 			_dropPanel.repaint();
 		}
 		else if(source.equals(_clearWaste)) {
+			wasteStatus = -1;
 			_colony.remWaste((int)_numberofWaste.getValue());
 			_numberofWaste.setValue(0);
 		}
 		else if(source.equals(_addWaste)) {
+			wasteStatus = 1;
 			_colony.addWaste((int)_numberofWaste.getValue());
 			_numberofWaste.setValue(0);
 		}
@@ -484,7 +485,6 @@ public class GameFrame extends JFrame implements ActionListener {
 		else if(source.equals(_add_rem)) {
 			if(_AddorRem == REMOVE) {
 				String _char = boxGroup.getSelectedCheckbox().getLabel();
-				System.out.println(_char);
 				_deathDeck.add(_char);
 				_playerArray[_whosTurn].removeChar(_char);
 				for(int i=0; i < _ListLoc.size(); i++) {
@@ -508,6 +508,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			_deck.show(_cardPanel, "main");
 		}
 		else if(source.equals(_nextTurn)) {
+			_colony.addHelpless(1); // Only for testing!
 			_whosTurn++;
 			if(_whosTurn == numbPlayers)
 				_whosTurn = 0;
@@ -531,6 +532,11 @@ public class GameFrame extends JFrame implements ActionListener {
 		
 		getInfo();
 		checkCard();
+		_actionsSel = "";
+		_char = "";
+		_currcharpos = "";
+		_loc = "";
+		_consi = "";
 	}
 	private void useWeaponIfPossible() {
 		if(!_loc.equals(_currcharpos)) {
@@ -569,6 +575,33 @@ public class GameFrame extends JFrame implements ActionListener {
 	private void solveCardEffect(int selectedOption, int onCard) {
 		if(onCard == 1 && selectedOption == 1 ) 
 			moveTo("Colony", _char);
+		else if(onCard == 49 && selectedOption == 3) {
+			_colony.remHelpless(1);
+		}
+		else if(onCard == 50 && selectedOption == 1) {
+			_colony.remHelpless(2);
+		}
+		else if(onCard == 52) {
+			if(selectedOption == 1) {
+				_deathDeck.add("Sophie Robinson");
+				for(int i=0; i < numbPlayers; i++) {
+					if(_playerArray[i].getCharList().contains("Sophie Robinson"))
+						_playerArray[i].removeChar("Sophie Robinson");
+				}
+				
+				for(int i=0; i < _ListLoc.size(); i++) {
+					if(((Location)_ListLoc.get(i)).isThere(_char))
+						((Location)_ListLoc.get(i)).remSurvivor(_char);
+				}
+			}
+		}
+		else if(onCard == 53)
+			_colony.remHelpless(1);
+		else if(onCard == 54) {
+			_colony.addZombies(5);
+			if(selectedOption == 1)
+				_colony.addHelpless(1);
+		}
 		else if(onCard == 56) {
 			if(selectedOption == 1) {
 				_playerArray[_whosTurn].addChar("John Price");
@@ -599,12 +632,11 @@ public class GameFrame extends JFrame implements ActionListener {
 			_library.remZombies(1);
 		else if(onCard == 70 && selectedOption == 1)
 			_colony.addZombies(5);
-		
 	}
 	
 	public void checkCard() {
 		/**************************/
-		_cardNumber = 55;
+		_cardNumber = 49;
 		/****************************/
 		if(!_crossroadDeck.alreadyDrawnThisRound()) {
 			if(!_crossroadDeck.isTriggered(_cardNumber)) {
@@ -613,9 +645,37 @@ public class GameFrame extends JFrame implements ActionListener {
 					if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
+				case 48:
+					if(anyCharAtSpecificLocation("Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 49:
+					if(anyCharAtSpecificLocation("Colony") && (_colony.getNumSurvivors()<_colony.getNumHelpless()))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 50:
+					if(anyCharAtSpecificLocation("Colony") && _colony.getNumHelpless()>=2) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					} break;
+				case 51:
+					if(anyCharAtSpecificLocation("Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 52:
+					if(_actionsSel.equals("Move") && !_charDeck.contains("Sophie Robinson") && !_deathDeck.contains("Sophie Robinson")) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 53://Solve card option 1!
+					if(_colony.getNumHelpless()>0) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
 				case 54:
-					// ************** här är vi *******************
-				case 55: // FIX RESOLVE CARD FOR THIS ONE!!!!!
+					if(wasteStatus==-1 && _colony.getNumHelpless()>0) 
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 55: // FIX RESOLVE CARD 55 FOR THIS ONE!!!!!
 					if(!allCharAtSpecificLocation("Colony") && _charDeck.contains("Mike Cho")){
 						for(int i = 0; i < _ListLoc.size(); i++){
 							if(anyCharAtSpecificLocation(_ListLoc.get(i).getName()) && (_ListLoc.get(i).getNumZom() > 0) && (_ListLoc.get(i).getName()!="Colony"))
@@ -735,7 +795,7 @@ public class GameFrame extends JFrame implements ActionListener {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
 				default: 
-					System.out.println("In switchcase Card " + _cardNumber + " doesnot exist!");
+					System.out.println("In switchcase Card " + _cardNumber + " does not exist!");
 					break;
 				}
 			}
