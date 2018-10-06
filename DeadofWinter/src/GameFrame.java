@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.peer.ButtonPeer;
 import java.lang.reflect.Method;
+import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +61,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	private JTextArea _infoChar;
 	private JTextArea _infoColony;
 	private CardLayout _maindeck;
-	private ArrayList<String> _currPlayerChar;
+	private ArrayList<String> _currPlayerChars;
 
 	private Location _gasStation;
 	private Location _hospital;
@@ -287,6 +288,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			return true;
 		return false;
 	}	
+	
 	public boolean allCharAtSpecificLocation(String _locName) {
 		ArrayList charNames = _playerArray[_whosTurn].getCharList();
 		int charsAtLocation = 0;
@@ -343,7 +345,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	}
 	
 	public void getInfo() {
-		_currPlayerChar = _playerArray[_whosTurn].getCharList();
+		_currPlayerChars = _playerArray[_whosTurn].getCharList();
 		_infoChar.setText("");
 		_Poscharinfo = "";
 		numPchars = _playerArray[_whosTurn].getNumchars();
@@ -391,7 +393,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		if(source.equals(_actionsButton)) {
 			_performPanel.add(_boxPanel, BorderLayout.CENTER);
 			for(int i=0; i < _charBox.length; i++) {
-				if(_currPlayerChar.contains(_charBox[i].getLabel())) {
+				if(_currPlayerChars.contains(_charBox[i].getLabel())) {
 						_charBox[i].setEnabled(true);
 						_charBox[i].setState(true);
 				}
@@ -406,7 +408,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			_currcharpos = _playerArray[_whosTurn].getCharPos(_char);
 			_loc = _locationDrop.getSelectedItem().toString();
 			_consi = _resultDrop.getSelectedItem().toString();
-			checkCard();
+			//checkCard();  Måste man ha checkCard här? eller räcker det att kolla efter? 
 			
 			if(_actionsSel.equals("Search")) {
 				if(!_loc.equals(_currcharpos)) {
@@ -436,8 +438,7 @@ public class GameFrame extends JFrame implements ActionListener {
 				//Ska man ens göra något här? 
 			}
 			if(error_cancel == 0)
-				_deck.show(_cardPanel, "main");
-			error_cancel = 0; 
+				_deck.show(_cardPanel, "main"); 
 			_dropPanel.repaint();
 		}
 		else if(source.equals(_clearWaste)) {
@@ -472,7 +473,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			_add_rem.setText("Remove Character");
 			_add_rem_label.setText("Check which character to remove");
 			for(int i=0; i < _charBox.length; i++) {
-				if(_currPlayerChar.contains(_charBox[i].getLabel())) {
+				if(_currPlayerChars.contains(_charBox[i].getLabel())) {
 						_charBox[i].setEnabled(true);
 						_charBox[i].setState(true);
 				}
@@ -522,7 +523,8 @@ public class GameFrame extends JFrame implements ActionListener {
 			_playerArray[_whosTurn].setCharStartPos();
 			_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
 			resetVariables();
-			checkCard();
+			if(error_cancel == 0) // Nytt för att inte kunnan trigga om man gör "fel" perform.
+				checkCard();
 		}
 		else if(source.equals(_crossroadDeck._Con)) {
 			resolveCardOption(_cardNumber);
@@ -530,12 +532,14 @@ public class GameFrame extends JFrame implements ActionListener {
 		}
 		
 		getInfo();
-		checkCard();
+		if(error_cancel == 0) // Nytt för att inte kunnan trigga om man gör "fel" perform.
+			checkCard();
 		_actionsSel = "";
 		_char = "";
 		_currcharpos = "";
 		_loc = "";
 		_consi = "";
+		error_cancel = 0;
 	}
 	private void useWeaponIfPossible() {
 		if(!_loc.equals(_currcharpos)) {
@@ -574,6 +578,12 @@ public class GameFrame extends JFrame implements ActionListener {
 	private void solveCardEffect(int selectedOption, int onCard) {
 		if(onCard == 1 && selectedOption == 1 ) 
 			moveTo("Colony", _char);
+		else if(onCard == 31 && selectedOption == 2)
+			_colony.remBaracade(_colony.getNumBar());
+		else if(onCard == 36) {
+			_deathDeck.add("Bev Russell");
+			_playerArray[_whosTurn].removeChar("Bev Russell");
+		}
 		else if(onCard == 45 && selectedOption == 2)
 			_playerArray[_whosTurn].removeChar(_char);
 		else if(onCard == 47 && selectedOption == 1) {
@@ -640,7 +650,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	
 	public void checkCard() {
 		/**************************/
-		_cardNumber = 38;
+		_cardNumber = 29;
 		/****************************/
 		if(!_crossroadDeck.alreadyDrawnThisRound()) {
 			if(!_crossroadDeck.isTriggered(_cardNumber)) {
@@ -649,6 +659,47 @@ public class GameFrame extends JFrame implements ActionListener {
 					if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
+				case 29:
+					
+					break;
+				case 30:
+					if(_actionsSel.equals("Search") && isCharExiled(_char) == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+				case 31:
+					if(anyCharAtSpecificLocation("Colony") && _colony.getNumZom()>0 && _colony.getNumBar()>0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 32:
+				case 33:// Count number of added card to the waste pile ?
+					if(anyCharAtSpecificLocation("Colony")) 
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 34: //Resolve card, that she cannot move to or from library?
+					if(_currPlayerChars.contains("Alexis Grey") && isCharExiled("Alexis Grey") == 0) {
+						moveTo("Library", "Alexis Grey");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 35:
+					if(_currPlayerChars.contains("James Meyers") && isCharExiled("James Meyers") == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 36:
+					if(_currPlayerChars.contains("Bev Russell")) {
+						moveTo("School", "Bev Russell");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 37:
+					for(int j = 0; j < _locations.length; j++) {
+						for(int i = 0; i < _currPlayerChars.size(); i++) {
+							if(!_locations[j].equals("Colony") && isCharAtLocation(_currPlayerChars.get(i), _locations[j])) {
+								if(isCharExiled(_currPlayerChars.get(i)) == 0)
+									_crossroadDeck.loadCardtoPanel(_cardNumber);
+							}
+						}
+					}
+					break;
 				case 38: //Put card on char.
 					if(anyCharAtSpecificLocation("Library"))
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
