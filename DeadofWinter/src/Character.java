@@ -6,7 +6,7 @@ public class Character {
 	private String _gender;
 	private int _status = 0; // 0=Non-Exiled, 1=Exiled 
 	private String _male[] = {"Kodiak Colby", "Arthur Thurston", "Andrew Evans", "David Garcia", "Thomas Heart", "Daniel Smith", "Brandon Kane",
-							"Gabriel Diaz", "John Price", "James Meyers", "Brian Lee", "Rod Miller", "Gray Beard", "Harman Brooks", "Mike Cho", 
+							"Gabriel Diaz", "John Price", "James Meyers", "Brian Lee", "Rod Miller", "Grey Beard", "Harman Brooks", "Mike Cho", 
 							"Buddy Davis", "Edward White", "Forest Plum"} ;
 	
 	public Character(String charName) {

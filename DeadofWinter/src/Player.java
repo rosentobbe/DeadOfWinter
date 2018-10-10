@@ -4,11 +4,14 @@ import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
 //import org.apache.commons.lang3.ArrayUtils;
 
+import bsh.Console;
+
 public class Player {
 	private String name;
 	private Character[] characters;
 	private ArrayList<String> allCharNames;
 	private int numChar;
+	private boolean exiled = false;
 	//private int maxChar = 8;
 	
 	public Player() {
@@ -18,7 +21,14 @@ public class Player {
 		setName(playername);
 		allCharNames = new ArrayList<String>();
 	}
-	
+	public boolean isPlayerExiled() {
+		return exiled;
+	}
+	public void setToExiled() {
+		exiled = true;
+		for(int i = 0; i < characters.length; i++)
+			characters[i].setStatus(1);
+	}
 	public int isExiled(String _charName) { // Status: -1: Player don't have that Character. 0: Player have that Character and not exiled. 1: Player have Character and Exiled. 
 		int status = -1;
 		for(int i=0; i<characters.length; i++) {
@@ -79,8 +89,9 @@ public class Player {
 				return characters[i].getPosition();
 			}
 		}
-			 System.out.println("Error: Not in Play");
-			 return "Error: Not in Play";
+		
+		System.out.println("Error: Not in Play");
+		return "Error: Not in Play";
 	}
 	
 	public void setCharPos(String _charName, String _newPos) {

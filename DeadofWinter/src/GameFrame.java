@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.PrimitiveIterator.OfDouble;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -23,6 +24,10 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import sun.tools.jar.resources.jar;
+
 public class GameFrame extends JFrame implements ActionListener {
 /************************************************************
 *			           Declares/initialization              *
@@ -34,6 +39,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	private int _started = 0;
 	private int _whosTurn = 0;
 	private int _round = 0;
+	
 	private Checkbox[] _charBox;
 	private CheckboxGroup boxGroup;
 	private String[] _charString;
@@ -78,7 +84,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	private String _currcharpos;
 	private String _newcharpos;
 	private Player[] _playerArray;
-	private int numPchars;
+	//private int numPchars;
 	
 	private JPanel _boxPanel;
 	//Move Frame
@@ -88,12 +94,11 @@ public class GameFrame extends JFrame implements ActionListener {
 	private String[] _actionsString = {"Search","Move", "Use Weapon", "Use Food", "Use Medicine"};
 	private String[] _locations = {"Colony", "Police Station", "School", "Library", "Hospital", "Gas Station", "Grocery Store"};
 	private String[] _result = {"Nothing", "Fuel", "Frostbite", "Wound", "Zombiebite"};
-	private JComboBox _locationDrop;
-	private JComboBox _resultDrop;
-	private JComboBox _actionsDrop;
+	private JComboBox<String> _locationDrop;
+	private JComboBox<String> _resultDrop;
+	private JComboBox<String> _actionsDrop;
 	
 	//Crossroad
-	private boolean alreadyDrawThisTurn = false;
 	private Crossroads _crossroadDeck;
 	private int _cardNumber;
 	private Random rand;
@@ -103,11 +108,15 @@ public class GameFrame extends JFrame implements ActionListener {
 	private String _ErrorText_SearchColony = "-Error: Can't search in Colony";
 	private String _ErrorText_moveSameLoc = "-Error: Can't MOVE to same location";
 	private JLabel _Errorlable;
+	private String _LastAddedChar = "";
 	private String _actionsSel = "";
 	private String _char = "";
 	private String _loc = "";
 	private String _consi = "";
-	
+	private String _male[] = {"Kodiak Colby", "Arthur Thurston", "Andrew Evans", "David Garcia", "Thomas Heart", "Daniel Smith", "Brandon Kane",
+			"Gabriel Diaz", "John Price", "James Meyers", "Brian Lee", "Rod Miller", "Grey Beard", "Harman Brooks", "Mike Cho", 
+			"Buddy Davis", "Edward White", "Forest Plum"};
+	private List<String> Males;
 	//Add/remove-panel
 	private final static int ADD = 1;
 	private final static int REMOVE = 0;
@@ -119,6 +128,7 @@ public class GameFrame extends JFrame implements ActionListener {
 *			          Start of Class                       *
 ************************************************************/
 	public GameFrame(Player[] _playerArrayay, int numPlayers, JCheckBox[] _listChars, String[] labels, String[] deck) {
+		//Males = Arrays.asList(_male);
 		this.setSize(700, 700);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
@@ -127,7 +137,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		//_charBox = _listChars; //Kommentera bort undre rad om denna blir insatt.
 		_charBox = new Checkbox[labels.length]; //Ta bort om övre blir insatt.
 		_charString = labels;
-		_charDeck = new ArrayList(Arrays.asList(deck));
+		_charDeck = new ArrayList<String>(Arrays.asList(deck));
 		_deathDeck = new ArrayList<String>();
 		
 		
@@ -206,9 +216,9 @@ public class GameFrame extends JFrame implements ActionListener {
 		_ListLoc.add( _groceryStore);
 		_ListLoc.add( _gasStation);
 		_ListLoc.add( _school);
-		
-		getInfo();
 		placeAllChars();
+		//getInfo();
+		//placeAllChars();
 		_playerArray[_whosTurn].setCharStartPos();
 
 		_mainCard.add(_actions1, "action1");
@@ -220,9 +230,9 @@ public class GameFrame extends JFrame implements ActionListener {
 		//Radio panel
 		_boxPanel = new JPanel(new GridLayout(8,4));
 		_boxPanel.setAlignmentY(JComponent.LEFT_ALIGNMENT);
-		_locationDrop = new JComboBox(_locations);
-		_resultDrop = new JComboBox(_result);
-		_actionsDrop = new JComboBox(_actionsString);
+		_locationDrop = new JComboBox<String>(_locations);
+		_resultDrop = new JComboBox<String>(_result);
+		_actionsDrop = new JComboBox<String>(_actionsString);
 		boxGroup = new CheckboxGroup();
 		checkboxes();
 		
@@ -250,6 +260,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		_crossroadDeck.setAlwaysOnTop(true);
 		rand = new Random();
 		_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
+		getInfo();
 		checkCard();
 		
 		//Add listeners
@@ -279,7 +290,8 @@ public class GameFrame extends JFrame implements ActionListener {
 	public int isCharExiled(String _charName) {
 		int status = -1;
 		for(int i=0; i < numbPlayers; i++) {
-			status = _playerArray[i].isExiled(_charName);
+			if(_playerArray[i].getCharList().contains(_charName))
+				status = _playerArray[i].isExiled(_charName);
 		}
 		return status;
 	}
@@ -290,7 +302,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	}	
 	
 	public boolean allCharAtSpecificLocation(String _locName) {
-		ArrayList charNames = _playerArray[_whosTurn].getCharList();
+		ArrayList<String> charNames = _playerArray[_whosTurn].getCharList();
 		int charsAtLocation = 0;
 		for(int i = 0; i < charNames.size(); i++) {
 			if(_playerArray[_whosTurn].getCharPos(charNames.get(i).toString()).equals(_locName))
@@ -334,7 +346,13 @@ public class GameFrame extends JFrame implements ActionListener {
 		}
 		return numberofChars;
 	}
-	
+	public Location getLocationWithName(String _LocationName) {
+		for(int i = 0; i < _ListLoc.size(); i++) {
+			if(_ListLoc.get(i).getName().equals(_LocationName))
+				return _ListLoc.get(i);
+		}
+		return null;
+	}
 	
 	public void checkboxes() {
 		boxGroup = new CheckboxGroup();
@@ -345,10 +363,14 @@ public class GameFrame extends JFrame implements ActionListener {
 	}
 	
 	public void getInfo() {
+//		for(int i = 0; i < _ListLoc.size(); i++) {
+//			System.out.println(_ListLoc.get(i).getName() + ": " + _ListLoc.get(i).getSurvivors().toString());
+//		}
+//		System.out.println("\n");
 		_currPlayerChars = _playerArray[_whosTurn].getCharList();
 		_infoChar.setText("");
 		_Poscharinfo = "";
-		numPchars = _playerArray[_whosTurn].getNumchars();
+		//numPchars = _playerArray[_whosTurn].getNumchars();
 		_player.setText(_playerArray[_whosTurn].getName() + "'s turn");
 		for(int i=0; i<numbPlayers; i++) {
 			_playerChars = _playerArray[i].getChars();
@@ -362,7 +384,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		_infoChar.setText(_Poscharinfo);
 		_playerInfo.add(_infoChar);
 		_infoColony.setText("Colony: " + "\n\nZombies: " + _colony.getNumZom() + "\n\nHelpless: "+ _colony.getNumHelpless() + 
-				"\n\nBaracades: " + _colony.getNumBar() + "\n\nRoundTracker: " + _round);
+				"\n\nBaracades: " + _colony.getNumBar() + "\n\nRoundTracker: " + _round + "\n\n\n\nSelected Crossroad: " + _cardNumber);
 		
 	}
 	
@@ -452,35 +474,10 @@ public class GameFrame extends JFrame implements ActionListener {
 			_numberofWaste.setValue(0);
 		}
 		else if(source.equals(_addChar)) {
-			_AddorRem = ADD;
-			_addremPanel.add(_boxPanel, BorderLayout.CENTER);
-			_add_rem.setText("Add Character");
-			_add_rem_label.setText("Check which character to add");
-			for(int i=0; i < _charBox.length; i++) {
-				if(_charDeck.contains(_charBox[i].getLabel())) {
-						_charBox[i].setEnabled(true);
-						_charBox[i].setState(true);
-				}
-				else
-					_charBox[i].setEnabled(false);
-			}
-			_deck.show(_cardPanel, "addrem");
-			
+			prepareAddWindow();
 		}
 		else if(source.equals(_remChar)) {
-			_AddorRem = REMOVE;
-			_addremPanel.add(_boxPanel, BorderLayout.CENTER);
-			_add_rem.setText("Remove Character");
-			_add_rem_label.setText("Check which character to remove");
-			for(int i=0; i < _charBox.length; i++) {
-				if(_currPlayerChars.contains(_charBox[i].getLabel())) {
-						_charBox[i].setEnabled(true);
-						_charBox[i].setState(true);
-				}
-				else
-					_charBox[i].setEnabled(false);
-			}
-			_deck.show(_cardPanel, "addrem");
+			prepareRemoveWindow();
 		}
 		else if(source.equals(_add_rem)) {
 			if(_AddorRem == REMOVE) {
@@ -494,6 +491,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			}
 			else if(_AddorRem == ADD) {
 				String _char = boxGroup.getSelectedCheckbox().getLabel();
+				_LastAddedChar = _char;
 				_playerArray[_whosTurn].addChar(_char);
 				_playerArray[_whosTurn].setCharPos(_char, "Colony");
 				_charDeck.remove(_char);
@@ -508,7 +506,8 @@ public class GameFrame extends JFrame implements ActionListener {
 			_deck.show(_cardPanel, "main");
 		}
 		else if(source.equals(_nextTurn)) {
-			_colony.addHelpless(1); // Only for testing!
+			_colony.addHelpless(1); // Only for testing.
+			System.out.println("********");
 			_whosTurn++;
 			if(_whosTurn == numbPlayers)
 				_whosTurn = 0;
@@ -518,7 +517,9 @@ public class GameFrame extends JFrame implements ActionListener {
 					_started = 0;
 				_whosTurn = _started;
 				_round--;
+				//getInfo();
 			}
+			getInfo();
 			_crossroadDeck.resetDrawnThisRound();
 			_playerArray[_whosTurn].setCharStartPos();
 			_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
@@ -535,11 +536,44 @@ public class GameFrame extends JFrame implements ActionListener {
 		if(error_cancel == 0) // Nytt för att inte kunnan trigga om man gör "fel" perform.
 			checkCard();
 		_actionsSel = "";
-		_char = "";
+		_LastAddedChar = "";
+		//_char = "";
 		_currcharpos = "";
 		_loc = "";
 		_consi = "";
 		error_cancel = 0;
+	}
+
+	private void prepareAddWindow() {
+		_AddorRem = ADD;
+		_addremPanel.add(_boxPanel, BorderLayout.CENTER);
+		_add_rem.setText("Add Character");
+		_add_rem_label.setText("Check which character to add");
+		for(int i=0; i < _charBox.length; i++) {
+			if(_charDeck.contains(_charBox[i].getLabel())) {
+					_charBox[i].setEnabled(true);
+					_charBox[i].setState(true);
+			}
+			else
+				_charBox[i].setEnabled(false);
+		}
+		_deck.show(_cardPanel, "addrem");
+	}
+
+	private void prepareRemoveWindow() {
+		_AddorRem = REMOVE;
+		_addremPanel.add(_boxPanel, BorderLayout.CENTER);
+		_add_rem.setText("Remove Character");
+		_add_rem_label.setText("Check which character to remove");
+		for(int i=0; i < _charBox.length; i++) {
+			if(_currPlayerChars.contains(_charBox[i].getLabel())) {
+					_charBox[i].setEnabled(true);
+					_charBox[i].setState(true);
+			}
+			else
+				_charBox[i].setEnabled(false);
+		}
+		_deck.show(_cardPanel, "addrem");
 	}
 	private void useWeaponIfPossible() {
 		if(!_loc.equals(_currcharpos)) {
@@ -578,6 +612,49 @@ public class GameFrame extends JFrame implements ActionListener {
 	private void solveCardEffect(int selectedOption, int onCard) {
 		if(onCard == 1 && selectedOption == 1 ) 
 			moveTo("Colony", _char);
+		else if(onCard == 3 && selectedOption == 2) 
+			moveTo(_playerArray[_whosTurn].getCharStartPos(_char), _char);
+		else if(onCard == 7 && selectedOption == 1)
+			_colony.remZombies(8);
+		else if(onCard == 9) {
+			if(selectedOption == 1) {
+				_hospital.remZombies(_hospital.getNumZom());
+				_hospital.addBaracade(4);
+			}
+			else if(selectedOption == 1) {
+				_groceryStore.remZombies(_groceryStore.getNumZom());
+				_groceryStore.addBaracade(4);
+			}
+		}
+		else if(onCard == 18 && selectedOption == 2) {
+			_playerArray[_whosTurn].addChar("Grey Beard");
+			_playerArray[_whosTurn].setCharPos("Grey Beard", "Colony");
+			_charDeck.remove("Grey Beard");
+			
+		}
+		else if(onCard == 19) {
+			if(selectedOption == 1) {
+				_charDeck.remove("Sophie Robinson");
+				_playerArray[_whosTurn].addChar("Sophie Robinson");
+				_playerArray[_whosTurn].setCharPos("Sophie Robinson", "Colony");
+			}
+			else if(selectedOption == 2) {
+				_charDeck.remove("Sophie Robinson");
+				_deathDeck.add("Sophie Robinson");
+			}
+		}
+		else if(onCard == 20 && selectedOption == 1)
+			prepareAddWindow();
+		else if(onCard == 22 && selectedOption == 1)
+			_colony.remHelpless(1);
+		else if(onCard == 24) {
+			if(selectedOption == 1)
+				moveTo("Colony", "Brandon Kane");
+		}
+		else if(onCard == 26 && selectedOption == 1)
+			moveTo("Grocery Store", "Forest Plum");
+		else if(onCard == 28 && selectedOption == 1)
+			_colony.addHelpless(3);
 		else if(onCard == 31 && selectedOption == 2)
 			_colony.remBaracade(_colony.getNumBar());
 		else if(onCard == 36) {
@@ -619,6 +696,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		else if(onCard == 56) {
 			if(selectedOption == 1) {
 				_playerArray[_whosTurn].addChar("John Price");
+				_playerArray[_whosTurn].setCharPos("John Price", "Colony");
 				_charDeck.remove("John Price");
 				for(int i = 0; i < _ListLoc.size(); i++) {
 					if(((Location)_ListLoc.get(i)).getName() != "School")
@@ -628,6 +706,15 @@ public class GameFrame extends JFrame implements ActionListener {
 			else if(selectedOption == 2) {
 				_charDeck.remove("John Price");
 				_deathDeck.add("John Price");
+			}
+		}
+		else if(onCard == 63) {
+			if(selectedOption == 1) {
+				_colony.addHelpless(3);
+				_playerArray[_whosTurn].addChar("Gabriel Diaz");
+				_playerArray[_whosTurn].setCharPos("Gabriel Diaz","Colony");
+				_charDeck.remove("Gabriel Diaz");
+
 			}
 		}
 		else if(onCard == 65) {
@@ -649,18 +736,152 @@ public class GameFrame extends JFrame implements ActionListener {
 	}
 	
 	public void checkCard() {
-		/**************************/
-		_cardNumber = 29;
-		/****************************/
+		/******Check a specific Card*********/
+		//_cardNumber = 63;
+		/************************************/
 		if(!_crossroadDeck.alreadyDrawnThisRound()) {
 			if(!_crossroadDeck.isTriggered(_cardNumber)) {
 				switch(_cardNumber) {
 				case 1: 
 					if(_actionsSel.equals("Move") && _consi.equals("Fuel")) {
+						moveTo("School", "Maria Lopez");
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
-				case 29:
+				case 2: // Resolve option for this card! Needs to check which player that should get it. 
+					for(int i = 0 ; i < numbPlayers; i++) {
+						if((i != _whosTurn) && (_playerArray[_whosTurn].getNumchars() > _playerArray[i].getNumchars()))
+							_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 3:
+					if(_actionsSel.equals("Move")  && !_consi.equals("Fuel"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break; 
+				case 4:
+					if(_actionsSel.equals("Use Medicine"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 5:
+					if(_actionsSel.equals("Use Food"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 6:
+					if(anyCharAtSpecificLocation("Grocery Store") && !_playerArray[_whosTurn].isPlayerExiled())
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 7:
+					if(_playerArray[_whosTurn].controlsChar("Sparky") && isCharExiled("Sparky") == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 8:
+					if(_playerArray[_whosTurn].controlsChar("Maria Lopez") && isCharExiled("Maria Lopez") == 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 9:
+					if(_playerArray[_whosTurn].controlsChar("Brian Lee") && isCharAtLocation("Brian Lee", "Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 10:
+					for(int i = 0; i < _ListLoc.size(); i++) {
+						if(_ListLoc.get(i).getName() != "Colony") { 
+							if(numberOfCharsPlayerControlls(whichPlayersContollAtThisLocation(_ListLoc.get(i).getSurvivors()), _whosTurn) > 1) {
+								_crossroadDeck.loadCardtoPanel(_cardNumber);
+								break;
+							}
+						}
+					}
+					break;
+				case 11: 
+					if(!_playerArray[_whosTurn].isPlayerExiled()) {
+						for(int i=0; i < _currPlayerChars.size(); i++) {
+							for(int j=0; j < _ListLoc.size(); j++) {
+								if(isCharAtLocation(_currPlayerChars.get(i), _ListLoc.get(j).getName())){
+									for(int k = 0; k < _ListLoc.get(j).getNumSurvivors(); k++){
+										if(isCharExiled(_ListLoc.get(j).getSurvivors().get(k)) == 1) {
+											_crossroadDeck.loadCardtoPanel(_cardNumber);
+											break;
+					}	}	}	}	}	}
 					
+					break;
+				case 12: // Check how to make this one! Since male and helpless needs to be added the same time....
+					if(Males.contains(_LastAddedChar))
+					break;
+				case 13:
+					if(_actionsSel.equals("Move"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 14: case 15:
+					if(anyCharAtSpecificLocation("Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 16:
+					if(_currPlayerChars.contains("Talia Jones"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 17:
+					if(_currPlayerChars.contains("Arthur Thurston") && isCharExiled("Arthur Thurston") == 0) {
+						moveTo("School", "Arthur Thurston");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 18:
+					if(_actionsSel.equals("Move") && _charDeck.contains("Grey Beard"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 19:
+					if(_actionsSel.equals("Move") && _charDeck.contains("Sophie Robinson"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+				case 20:
+					if(_actionsSel.equals("Search") && isCharExiled(_char)==0) {
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}break;
+				case 21:
+					if(anyCharAtSpecificLocation("Colony"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 22:
+					if(anyCharAtSpecificLocation("Colony") && _colony.getNumHelpless()>0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 23:
+					if(!_charDeck.contains("Olivia Brown") && !_deathDeck.contains("Olivia Brown")) {
+						moveTo("Colony", "Olivia Brown");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 24: // make a selection of how many wastes you add to the pile!
+					if(!_charDeck.contains("Brandon Kane") && !_deathDeck.contains("Brandon Kane") && isCharExiled("Brandon Kane") == 0) {
+						moveTo("Grocery Store", "Brandon Kane");
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 25: // Uses item card ability! Add option to dropdown?
+					break;
+				case 26:
+					if(!_charDeck.contains("Forest Plum") && !_deathDeck.contains("Forest Plum"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 27: // Resolve card option 1!
+					if(_currPlayerChars.contains("Daniel Smith") && _colony.getNumHelpless()>0) {
+						_colony.remHelpless(1);
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					}
+					break;
+				case 28:
+					if(_actionsSel.equals("Move") && isCharExiled(_char) == 0 && getLocationWithName(_loc).getNumSurvivors() <= 1)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
+					break;
+				case 29:
+					if(_playerArray[_whosTurn].isPlayerExiled()) {
+						System.out.println("The player is exiled!");
+						for(int i = 0; i < _currPlayerChars.size(); i++){
+							for(int j = 0; j < _ListLoc.size(); j++) {
+								if(_ListLoc.get(j).getName().equals(_playerArray[_whosTurn].getCharPos(_currPlayerChars.get(i)))) {
+									for(int k = 0; k < _ListLoc.get(i).getNumSurvivors(); k++) {
+										if(isCharExiled(_ListLoc.get(j).getSurvivors().get(k)) == 0) {
+											_crossroadDeck.loadCardtoPanel(_cardNumber);
+											break;
+					}	}	}	}	}	}
 					break;
 				case 30:
 					if(_actionsSel.equals("Search") && isCharExiled(_char) == 0)
@@ -709,6 +930,7 @@ public class GameFrame extends JFrame implements ActionListener {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					break;
 				case 40:// Dont know how to do this! Maybe put another parameter on chars?
+					break;
 				case 41: // Fix the solvecard for this one! Dont really know how to do with the pick survivors!
 					if(!_charDeck.contains("Rod Miller") && !_deathDeck.contains("Rod Miller"))
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
@@ -799,8 +1021,9 @@ public class GameFrame extends JFrame implements ActionListener {
 					if(!_charDeck.contains("Edward White") && !_charDeck.contains("John Price") && !_deathDeck.contains("Edward White") && !_deathDeck.contains("John Price"))
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					break;
-				case 63: // ******* not done *******
-					System.out.println("Do this card!!");	
+				case 63: 
+					if(!_playerArray[_whosTurn].isPlayerExiled() && !allCharAtSpecificLocation("Colony") && _charDeck.contains("Gabriel Diaz"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					break; 
 				case 64:
 					if(_playerArray[_whosTurn].controlsChar("Andrew Evans") && isCharExiled("Andrew Evans") == 0) {
@@ -883,14 +1106,14 @@ public class GameFrame extends JFrame implements ActionListener {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					} break;
 				default: 
-					System.out.println("In switchcase Card " + _cardNumber + " does not exist!");
+					System.out.println("Card " + _cardNumber + " does not exist!");
 					break;
 				}
 			}
-			/*else { // Uncomment this as all crossroadcards are finished!
+			else {
 				_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
 				checkCard();
-			}*/
+			}
 		}
 	}
 }

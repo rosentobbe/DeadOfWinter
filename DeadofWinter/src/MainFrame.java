@@ -50,7 +50,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		private String labels[] = { "Alexis Grey", "Andrew Evans", "Annaleigh Chan", "Arthur Thurston",
 				"Ashley Ross", "Bev Russell", "Brandon Kane", "Brian Lee", "Buddy Davis",
 				 "Carla Thompson", "Daniel Smith", "David Garcia", "Edward White", "Forest Plum",
-				"Gray Beard", "Gabriel Diaz", "Harman Brooks", "Jenny Clark", "James Meyers",
+				"Grey Beard", "Gabriel Diaz", "Harman Brooks", "Jenny Clark", "James Meyers",
 				"John Price", "Janet Taylor", "Kodiak Colby", "Loretta Clay", "Mike Cho",
 				"Maria Lopez", "Olivia Brown", "Rod Miller", "Sophie Robinson", "Sparky",
 			     "Thomas Heart", "Talia Jones"
