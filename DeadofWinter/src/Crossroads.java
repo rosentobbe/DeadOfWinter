@@ -39,13 +39,6 @@ public class Crossroads extends JFrame implements ActionListener{
 	private String _Opt2F; // full text of the option
 	private String _Opt3F; // full text of the option
 	private Player[] _playerArray;
-//	private Colony colony;
-//	private Location gas;
-//	private Location school;
-//	private Location police;
-//	private Location groc;
-//	private Location lib;
-//	private Location hosp;
 	private ArrayList<Location> _ListLoc;
 //	private String _Loc;
 //	private String _currChar;
@@ -160,17 +153,6 @@ public class Crossroads extends JFrame implements ActionListener{
 			System.out.println("Crossroadcard is done.");
 			this.setVisible(false);
 		}
-//		if(source.equals(_optB1_1)) {
-//			_infoField.setText("Option 1: <br>"+ _Opt1F);
-//			moveTo("Colony", _currChar);
-//			repaintBPanel();
-//		}
-//		else if(source.equals(_optB1_2)) {
-//			_infoField.setText("Option 2: <br>"+ _Opt2F);
-//			moveTo(_Loc, _currChar);
-//			repaintBPanel();
-//		}
-
 	}
 	public int getSelected() {
 		return _selectedOption;

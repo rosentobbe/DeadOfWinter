@@ -91,7 +91,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	private JPanel _dropPanel;
 	private JPanel _performPanel;
 	private JButton _perform;
-	private String[] _actionsString = {"Search","Move", "Use Weapon", "Use Food", "Use Medicine"};
+	private String[] _actionsString = {"Search","Move", "Use Weapon", "Use Food", "Use Medicine", "Use Attached Card"};
 	private String[] _locations = {"Colony", "Police Station", "School", "Library", "Hospital", "Gas Station", "Grocery Store"};
 	private String[] _result = {"Nothing", "Fuel", "Frostbite", "Wound", "Zombiebite"};
 	private JComboBox<String> _locationDrop;
@@ -163,7 +163,6 @@ public class GameFrame extends JFrame implements ActionListener {
 		_name = new JPanel();
 		_info = new JPanel();
 		_playerInfo = new JPanel();
-	//	_playerInfo.setBorder(new EmptyBorder(10,10,10,10));
 		_info.add(_playerInfo);
 		_actionsButton = new JButton("Actions");
 		_player = new JLabel();
@@ -608,15 +607,22 @@ public class GameFrame extends JFrame implements ActionListener {
 		int selectedOption = _crossroadDeck.getSelected();
 		solveCardEffect(selectedOption, cardNumber);
 	}
-	
+
 	private void solveCardEffect(int selectedOption, int onCard) {
-		if(onCard == 1 && selectedOption == 1 ) 
-			moveTo("Colony", _char);
-		else if(onCard == 3 && selectedOption == 2) 
-			moveTo(_playerArray[_whosTurn].getCharStartPos(_char), _char);
-		else if(onCard == 7 && selectedOption == 1)
-			_colony.remZombies(8);
-		else if(onCard == 9) {
+		switch(onCard) {
+		case 1:
+			if(selectedOption == 1)
+				moveTo("Colony", _char);	
+			break;
+		case 3:
+			if(selectedOption == 2)
+				moveTo(_playerArray[_whosTurn].getCharStartPos(_char), _char);	
+			break;
+		case 7:
+			if(selectedOption == 1)
+				_colony.remZombies(8);
+			break;
+		case 9:
 			if(selectedOption == 1) {
 				_hospital.remZombies(_hospital.getNumZom());
 				_hospital.addBaracade(4);
@@ -625,14 +631,15 @@ public class GameFrame extends JFrame implements ActionListener {
 				_groceryStore.remZombies(_groceryStore.getNumZom());
 				_groceryStore.addBaracade(4);
 			}
-		}
-		else if(onCard == 18 && selectedOption == 2) {
-			_playerArray[_whosTurn].addChar("Grey Beard");
-			_playerArray[_whosTurn].setCharPos("Grey Beard", "Colony");
-			_charDeck.remove("Grey Beard");
-			
-		}
-		else if(onCard == 19) {
+			break;
+		case 18:
+			if(selectedOption == 2) {
+				_playerArray[_whosTurn].addChar("Grey Beard");
+				_playerArray[_whosTurn].setCharPos("Grey Beard", "Colony");
+				_charDeck.remove("Grey Beard");
+			}
+			break;
+		case 19:
 			if(selectedOption == 1) {
 				_charDeck.remove("Sophie Robinson");
 				_playerArray[_whosTurn].addChar("Sophie Robinson");
@@ -642,38 +649,60 @@ public class GameFrame extends JFrame implements ActionListener {
 				_charDeck.remove("Sophie Robinson");
 				_deathDeck.add("Sophie Robinson");
 			}
-		}
-		else if(onCard == 20 && selectedOption == 1)
-			prepareAddWindow();
-		else if(onCard == 22 && selectedOption == 1)
-			_colony.remHelpless(1);
-		else if(onCard == 24) {
+			break;
+		case 20:
+			if(selectedOption == 1)
+				prepareAddWindow();
+			break;
+		case 22:
+			if(selectedOption == 1)
+				_colony.remHelpless(1);
+			break;
+		case 24:
 			if(selectedOption == 1)
 				moveTo("Colony", "Brandon Kane");
-		}
-		else if(onCard == 26 && selectedOption == 1)
-			moveTo("Grocery Store", "Forest Plum");
-		else if(onCard == 28 && selectedOption == 1)
-			_colony.addHelpless(3);
-		else if(onCard == 31 && selectedOption == 2)
-			_colony.remBaracade(_colony.getNumBar());
-		else if(onCard == 36) {
-			_deathDeck.add("Bev Russell");
-			_playerArray[_whosTurn].removeChar("Bev Russell");
-		}
-		else if(onCard == 45 && selectedOption == 2)
-			_playerArray[_whosTurn].removeChar(_char);
-		else if(onCard == 47 && selectedOption == 1) {
-			for(int i=0; i < _ListLoc.size(); i++)
-				_ListLoc.get(i).remZombies(1);
-		}
-		else if(onCard == 48 && selectedOption == 1)
-			_colony.addHelpless(numbPlayers);
-		else if(onCard == 49 && selectedOption == 3) 
-			_colony.remHelpless(1);
-		else if(onCard == 50 && selectedOption == 1) 
-			_colony.remHelpless(2);
-		else if(onCard == 52) {
+			break;
+		case 26:
+			if(selectedOption == 1)
+				moveTo("Grocery Store", "Forest Plum");
+			break;
+		case 28:
+			if(selectedOption == 1)
+				_colony.addHelpless(3);
+			break;
+		case 31:
+			if(selectedOption == 2)
+				_colony.remBaracade(_colony.getNumBar());
+			break;
+		case 36:
+			if(selectedOption == 1) {
+				_deathDeck.add("Bev Russell");
+				_playerArray[_whosTurn].removeChar("Bev Russell");
+			}
+			break;
+		case 45:
+			if(selectedOption == 2)
+				_playerArray[_whosTurn].removeChar(_char);
+			break;
+		case 47:
+			if(selectedOption == 1) {
+				for(int i=0; i < _ListLoc.size(); i++)
+					_ListLoc.get(i).remZombies(1);
+			}
+			break;
+		case 48:
+			if(selectedOption == 1)
+				_colony.addHelpless(numbPlayers);
+			break;
+		case 49:
+			if(selectedOption == 3)
+				_colony.remHelpless(1);
+			break;
+		case 50:
+			if(selectedOption == 1)
+				_colony.remHelpless(2);
+			break;
+		case 52:
 			if(selectedOption == 1) {
 				_deathDeck.add("Sophie Robinson");
 				for(int i=0; i < numbPlayers; i++) {
@@ -685,15 +714,17 @@ public class GameFrame extends JFrame implements ActionListener {
 						((Location)_ListLoc.get(i)).remSurvivor(_char);
 				}
 			}
-		}
-		else if(onCard == 53)
-			_colony.remHelpless(1);
-		else if(onCard == 54) {
+			break;
+		case 53:
+			if(selectedOption == 2)
+				_colony.remHelpless(1);
+			break;
+		case 54:
 			_colony.addZombies(5);
 			if(selectedOption == 1)
 				_colony.addHelpless(1);
-		}
-		else if(onCard == 56) {
+			break;
+		case 56:
 			if(selectedOption == 1) {
 				_playerArray[_whosTurn].addChar("John Price");
 				_playerArray[_whosTurn].setCharPos("John Price", "Colony");
@@ -707,17 +738,16 @@ public class GameFrame extends JFrame implements ActionListener {
 				_charDeck.remove("John Price");
 				_deathDeck.add("John Price");
 			}
-		}
-		else if(onCard == 63) {
+			break;
+		case 63:
 			if(selectedOption == 1) {
 				_colony.addHelpless(3);
 				_playerArray[_whosTurn].addChar("Gabriel Diaz");
 				_playerArray[_whosTurn].setCharPos("Gabriel Diaz","Colony");
 				_charDeck.remove("Gabriel Diaz");
-
-			}
-		}
-		else if(onCard == 65) {
+			}			
+			break;
+		case 65:
 			if(selectedOption == 1) {
 				for(int i = 0; i < _ListLoc.size(); i++) {
 					if(((Location)_ListLoc.get(i)).getName() != "Colony")
@@ -728,11 +758,142 @@ public class GameFrame extends JFrame implements ActionListener {
 				_playerArray[_whosTurn].removeChar("Annaleigh Chan");
 				_deathDeck.add("Annaleigh Chan");
 			}
+			break;
+		case 69:
+			if(selectedOption == 2)
+				_library.remZombies(1);
+			break;
+		case 70:
+			if(selectedOption == 1)
+				_colony.addZombies(5);
+			break;
 		}
-		else if(onCard == 69 && selectedOption == 2)
-			_library.remZombies(1);
-		else if(onCard == 70 && selectedOption == 1)
-			_colony.addZombies(5);
+		/*
+		 if(onCard == 1 && selectedOption == 1 ) 
+				moveTo("Colony", _char);
+			else if(onCard == 3 && selectedOption == 2) 
+				moveTo(_playerArray[_whosTurn].getCharStartPos(_char), _char);
+			else if(onCard == 7 && selectedOption == 1)
+				_colony.remZombies(8);
+			else if(onCard == 9) {
+				if(selectedOption == 1) {
+					_hospital.remZombies(_hospital.getNumZom());
+					_hospital.addBaracade(4);
+				}
+				else if(selectedOption == 1) {
+					_groceryStore.remZombies(_groceryStore.getNumZom());
+					_groceryStore.addBaracade(4);
+				}
+			}
+			else if(onCard == 18 && selectedOption == 2) {
+				_playerArray[_whosTurn].addChar("Grey Beard");
+				_playerArray[_whosTurn].setCharPos("Grey Beard", "Colony");
+				_charDeck.remove("Grey Beard");
+				
+			}
+			else if(onCard == 19) {
+				if(selectedOption == 1) {
+					_charDeck.remove("Sophie Robinson");
+					_playerArray[_whosTurn].addChar("Sophie Robinson");
+					_playerArray[_whosTurn].setCharPos("Sophie Robinson", "Colony");
+				}
+				else if(selectedOption == 2) {
+					_charDeck.remove("Sophie Robinson");
+					_deathDeck.add("Sophie Robinson");
+				}
+			}
+			else if(onCard == 20 && selectedOption == 1)
+				prepareAddWindow();
+			else if(onCard == 22 && selectedOption == 1)
+				_colony.remHelpless(1);
+			else if(onCard == 24) {
+				if(selectedOption == 1)
+					moveTo("Colony", "Brandon Kane");
+			}
+			else if(onCard == 26 && selectedOption == 1)
+				moveTo("Grocery Store", "Forest Plum");
+			else if(onCard == 28 && selectedOption == 1)
+				_colony.addHelpless(3);
+			else if(onCard == 31 && selectedOption == 2)
+				_colony.remBaracade(_colony.getNumBar());
+			else if(onCard == 36) {
+				_deathDeck.add("Bev Russell");
+				_playerArray[_whosTurn].removeChar("Bev Russell");
+			}
+			else if(onCard == 45 && selectedOption == 2)
+				_playerArray[_whosTurn].removeChar(_char);
+			else if(onCard == 47 && selectedOption == 1) {
+				for(int i=0; i < _ListLoc.size(); i++)
+					_ListLoc.get(i).remZombies(1);
+			}
+			else if(onCard == 48 && selectedOption == 1)
+				_colony.addHelpless(numbPlayers);
+			else if(onCard == 49 && selectedOption == 3) 
+				_colony.remHelpless(1);
+			else if(onCard == 50 && selectedOption == 1) 
+				_colony.remHelpless(2);
+			else if(onCard == 52) {
+				if(selectedOption == 1) {
+					_deathDeck.add("Sophie Robinson");
+					for(int i=0; i < numbPlayers; i++) {
+						if(_playerArray[i].getCharList().contains("Sophie Robinson"))
+							_playerArray[i].removeChar("Sophie Robinson");
+					}
+					for(int i=0; i < _ListLoc.size(); i++) {
+						if(((Location)_ListLoc.get(i)).isThere(_char))
+							((Location)_ListLoc.get(i)).remSurvivor(_char);
+					}
+				}
+			}
+			else if(onCard == 53)
+				_colony.remHelpless(1);
+			else if(onCard == 54) {
+				_colony.addZombies(5);
+				if(selectedOption == 1)
+					_colony.addHelpless(1);
+			}
+			else if(onCard == 56) {
+				if(selectedOption == 1) {
+					_playerArray[_whosTurn].addChar("John Price");
+					_playerArray[_whosTurn].setCharPos("John Price", "Colony");
+					_charDeck.remove("John Price");
+					for(int i = 0; i < _ListLoc.size(); i++) {
+						if(((Location)_ListLoc.get(i)).getName() != "School")
+							((Location)_ListLoc.get(i)).addZombies(2);
+					}
+				}
+				else if(selectedOption == 2) {
+					_charDeck.remove("John Price");
+					_deathDeck.add("John Price");
+				}
+			}
+			else if(onCard == 63) {
+				if(selectedOption == 1) {
+					_colony.addHelpless(3);
+					_playerArray[_whosTurn].addChar("Gabriel Diaz");
+					_playerArray[_whosTurn].setCharPos("Gabriel Diaz","Colony");
+					_charDeck.remove("Gabriel Diaz");
+
+				}
+			}
+			else if(onCard == 65) {
+				if(selectedOption == 1) {
+					for(int i = 0; i < _ListLoc.size(); i++) {
+						if(((Location)_ListLoc.get(i)).getName() != "Colony")
+							((Location)_ListLoc.get(i)).addZombies(1);
+					}
+				}
+				else if(selectedOption == 2) {
+					_playerArray[_whosTurn].removeChar("Annaleigh Chan");
+					_deathDeck.add("Annaleigh Chan");
+				}
+			}
+			else if(onCard == 69 && selectedOption == 2)
+				_library.remZombies(1);
+			else if(onCard == 70 && selectedOption == 1)
+				_colony.addZombies(5);
+
+		  */
 	}
 	
 	public void checkCard() {
@@ -801,7 +962,6 @@ public class GameFrame extends JFrame implements ActionListener {
 											_crossroadDeck.loadCardtoPanel(_cardNumber);
 											break;
 					}	}	}	}	}	}
-					
 					break;
 				case 12: // Check how to make this one! Since male and helpless needs to be added the same time....
 					if(Males.contains(_LastAddedChar))
@@ -855,7 +1015,9 @@ public class GameFrame extends JFrame implements ActionListener {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					}
 					break;
-				case 25: // Uses item card ability! Add option to dropdown?
+				case 25: 
+					if(_actionsSel.equals("Use Attached Card"))
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					break;
 				case 26:
 					if(!_charDeck.contains("Forest Plum") && !_deathDeck.contains("Forest Plum"))
