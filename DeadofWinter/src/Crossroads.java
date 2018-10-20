@@ -54,7 +54,7 @@ public class Crossroads extends JFrame implements ActionListener{
 		_ListLoc = _lLoc;
 		collectCardsFromFile = new CSVParser();
 		collectCardsFromFile.ParseCSVFileWithCards();
-		numberOfCards = collectCardsFromFile.getNumberOfCards()-1;
+		numberOfCards = collectCardsFromFile.getNumberOfCards();
 		_triggerStatus = new int[numberOfCards];
 		for(int i=0; i < _triggerStatus.length; i++)
 			_triggerStatus[i] = 0;
@@ -150,6 +150,7 @@ public class Crossroads extends JFrame implements ActionListener{
 			repaintBPanel();
 		}
 		else if(source.equals(_Con)) {
+			buttonPanel.removeAll();
 			System.out.println("Crossroadcard is done.");
 			this.setVisible(false);
 		}

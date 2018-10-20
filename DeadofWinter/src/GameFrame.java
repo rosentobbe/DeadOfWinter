@@ -116,19 +116,20 @@ public class GameFrame extends JFrame implements ActionListener {
 	private String _male[] = {"Kodiak Colby", "Arthur Thurston", "Andrew Evans", "David Garcia", "Thomas Heart", "Daniel Smith", "Brandon Kane",
 			"Gabriel Diaz", "John Price", "James Meyers", "Brian Lee", "Rod Miller", "Grey Beard", "Harman Brooks", "Mike Cho", 
 			"Buddy Davis", "Edward White", "Forest Plum"};
-	private List<String> Males;
+	private ArrayList<String> _maleName;
 	//Add/remove-panel
 	private final static int ADD = 1;
 	private final static int REMOVE = 0;
 	private int _AddorRem = -1;
 	private JButton _add_rem;
 	private JLabel _add_rem_label;
+	private JSpinner _numberofHelpless;
+	private JLabel _helplessText = new JLabel("How many Helpless would you like to add?");
 
 /***********************************************************
 *			          Start of Class                       *
 ************************************************************/
 	public GameFrame(Player[] _playerArrayay, int numPlayers, JCheckBox[] _listChars, String[] labels, String[] deck) {
-		//Males = Arrays.asList(_male);
 		this.setSize(700, 700);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
@@ -137,6 +138,7 @@ public class GameFrame extends JFrame implements ActionListener {
 		//_charBox = _listChars; //Kommentera bort undre rad om denna blir insatt.
 		_charBox = new Checkbox[labels.length]; //Ta bort om övre blir insatt.
 		_charString = labels;
+		_maleName = new ArrayList<String>(Arrays.asList(_male));
 		_charDeck = new ArrayList<String>(Arrays.asList(deck));
 		_deathDeck = new ArrayList<String>();
 		
@@ -248,17 +250,21 @@ public class GameFrame extends JFrame implements ActionListener {
 		_performPanel.add(_dropPanel, BorderLayout.PAGE_END);
 		
 		//Add Remove char panel
+		JPanel helplessPanel = new JPanel();
 		_add_rem = new JButton();
 		_add_rem_label = new JLabel();
 		_addremPanel = new JPanel(new BorderLayout());
+		_numberofHelpless = new JSpinner(new SpinnerNumberModel(0, 0, 3, 1));
 		_addremPanel.add(_add_rem_label, BorderLayout.PAGE_START);
-		_addremPanel.add(_add_rem, BorderLayout.PAGE_END);
-		
+		helplessPanel.add(_helplessText);
+		helplessPanel.add(_numberofHelpless);
+		helplessPanel.add(_add_rem);
+		_addremPanel.add(helplessPanel, BorderLayout.PAGE_END);
 		//Crossroaddeck and random draw.
 		_crossroadDeck = new Crossroads(_playerArray, _ListLoc);
 		_crossroadDeck.setAlwaysOnTop(true);
 		rand = new Random();
-		_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
+		_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()-1)+1;
 		getInfo();
 		checkCard();
 		
@@ -495,6 +501,9 @@ public class GameFrame extends JFrame implements ActionListener {
 				_playerArray[_whosTurn].setCharPos(_char, "Colony");
 				_charDeck.remove(_char);
 				_colony.addSurvivor(_char);
+				_colony.addHelpless((int) _numberofHelpless.getValue());
+				checkCard();
+				_numberofHelpless.setValue(0);
 			}
 			//** Test that can be removed when done!
 			Character[] test = _playerArray[_whosTurn].getChars();
@@ -505,8 +514,6 @@ public class GameFrame extends JFrame implements ActionListener {
 			_deck.show(_cardPanel, "main");
 		}
 		else if(source.equals(_nextTurn)) {
-			_colony.addHelpless(1); // Only for testing.
-			System.out.println("********");
 			_whosTurn++;
 			if(_whosTurn == numbPlayers)
 				_whosTurn = 0;
@@ -521,7 +528,7 @@ public class GameFrame extends JFrame implements ActionListener {
 			getInfo();
 			_crossroadDeck.resetDrawnThisRound();
 			_playerArray[_whosTurn].setCharStartPos();
-			_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
+			_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()-1)+1;
 			resetVariables();
 			if(error_cancel == 0) // Nytt för att inte kunnan trigga om man gör "fel" perform.
 				checkCard();
@@ -898,7 +905,7 @@ public class GameFrame extends JFrame implements ActionListener {
 	
 	public void checkCard() {
 		/******Check a specific Card*********/
-		//_cardNumber = 63;
+		//_cardNumber = ;
 		/************************************/
 		if(!_crossroadDeck.alreadyDrawnThisRound()) {
 			if(!_crossroadDeck.isTriggered(_cardNumber)) {
@@ -963,8 +970,9 @@ public class GameFrame extends JFrame implements ActionListener {
 											break;
 					}	}	}	}	}	}
 					break;
-				case 12: // Check how to make this one! Since male and helpless needs to be added the same time....
-					if(Males.contains(_LastAddedChar))
+				case 12:
+					if(_maleName.contains(_LastAddedChar) && ((int)_numberofHelpless.getValue()) > 0)
+						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					break;
 				case 13:
 					if(_actionsSel.equals("Move"))
@@ -1172,7 +1180,7 @@ public class GameFrame extends JFrame implements ActionListener {
 						_crossroadDeck.loadCardtoPanel(_cardNumber);
 					break;
 				case 60: // Yawn Card Replace with a new one, for now it will randomize a new number.
-					_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
+					_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()-1)+1;
 					checkCard();
 					break;
 				case 61:
@@ -1273,7 +1281,7 @@ public class GameFrame extends JFrame implements ActionListener {
 				}
 			}
 			else {
-				_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()+1);
+				_cardNumber = rand.nextInt(_crossroadDeck.getNumberofCards()-1)+1;
 				checkCard();
 			}
 		}
